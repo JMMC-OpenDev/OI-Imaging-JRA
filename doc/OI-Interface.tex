@@ -1,0 +1,361 @@
+\documentclass{article}
+\usepackage[affil-it]{authblk}
+
+\usepackage{graphicx}
+\usepackage[space]{grffile} % extends the file name processing of package graphics
+
+%\usepackage{latexsym} % add some characters from the "lasy" fonts
+\usepackage{amsfonts,amsmath,amssymb}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{OI-Interface}
+
+\hypersetup{%
+  pdftitle={},
+  pdfauthor={},
+  colorlinks=true,
+  linkcolor=DarkCyan,
+  citecolor=DarkGreen,
+  filecolor=DarkCyan,
+  menucolor=DarkOrange,
+  urlcolor=DarkCyan,
+  pdfborder={0 0 0}}
+
+\usepackage{textcomp}
+\usepackage{longtable}
+\usepackage{multirow,booktabs}
+\usepackage[authoryear,round]{natbib}
+
+%==============================================================================
+\newcommand*{\ROW}{} % predefined here, redefined later
+\newcommand*{\ROWTITLE}{} % predefined here, redefined later
+
+\newcommand{\oops}[1]{\DarkRed{#1}}
+\newcommand{\KEYWORD}[1]{\texttt{#1}} % FITS keyword
+\newcommand{\STRING}[1]{\texttt{'#1'}} % FITS string value
+\newcommand{\VARIABLE}[1]{\texttt{\textsl{#1}}}
+%==============================================================================
+
+
+\begin{document}
+
+\title{Interface to Image Reconstruction}
+
+\author{Éric Thiébaut$^1$, Jonathan Léger$^1$, Micehl Tallon$^1$, John
+  Young$^2$ Gilles Duvert$^3$, Guillaume Mella$^3$, Laurent Bourges$^3$ \&
+  Martin Vannier$^4$}
+
+\affil{$^1$CRAL, $^2$Cambridge University, $^3$JMMC/IPAG, $^4$Lagrange}
+
+
+\date{\today}
+
+\maketitle
+
+%==============================================================================
+\section{Introduction}
+
+Many image reconstruction algorithms have been developed to process optical
+interferometric data.  Using these algorithms may require substantial
+expertise (for instance you may have to learn a specific programming
+language). One of the objectives of the OPTICON JRA4 is to provide a common
+graphical user interface (GUI) to drive such imaging algorithms in a
+\emph{user friendly} way. For obvious reasons, we also want to avoid rewriting
+the image reconstruction algorithms as much as possible.  A model of
+interaction between these two pieces of software under these constraints has
+to be developed. This document aims at specifying a common software interface
+for image reconstruction algorithms.
+
+On the image reconstruction side, this involves specifying exactly the inputs:
+OI-FITS file for the data, the initial image, and other settings such as the
+regularization and its hyper-parameters.\footnote{In a previous discussion,
+John Young suggested to have a text file with a simple format to gives the
+values of the input parameters. The format of this file must be simple and
+such that it can be easily edited by a human and easily read by a software.
+Here a different proposition is made which exploits the flexibility of the
+FITS format.} Given these inputs, the image reconstruction algorithm should
+start the reconstruction producing two kind of outputs:
+\begin{description}
+  \item[Intermediate outputs:]  These consist in iteration informations
+  printed on the standard output (for instance)  and captured by the GUI and
+  also the current solution in the form of an image, the corresponding model
+  of the measurements (\emph{e.g.}, the complex visibilities).  These outputs
+  will be used by the GUI to display the current solution, to compare the
+  actual data with the current model, \emph{etc.}
+
+  \item[Final outputs:]  These are essentially the final image and consistent
+  information about the pixel size, the orientation, \emph{etc.} but also
+  about the input data (\emph{i.e.} to avoid a \emph{traceability issue}), the
+  reconstruction method and its parameters.
+\end{description}
+
+A few related points have to be considered:
+\begin{enumerate}
+  \item The command line image reconstruction algorithms should (or not?)
+  switch off their own display capabilities.
+
+  \item There must be a way to interrupt the image reconstruction algorithms
+  so as to make sure they do release all their resources (no zombie process,
+  undetached shared memory, etc.).
+
+  \item Restarting an image reconstruction (to continue the iterations or
+  perhaps with a few settings changed) should simply be a matter to re-start
+  the algorithm with, as its input image, the last produced image.
+
+  \item  In case of errors, we must adopt some kind of conventions to make
+  sure that the GUI can properly account for the errors.
+\end{enumerate}
+
+%The GUI will be developed at JMMC, presumably in Java as it is mostly portable
+%and they already use this language for their developments. Furthermore, they
+%have a mastering for the kind of software wrapping we want to have. For
+%instance, having a GUI which drives a command line program is exploited by
+%LITpro, the model fitting software of the JMMC.
+
+
+To summarize, on entry:
+\begin{itemize}
+\item the data;
+\item image parameters (dimensions, pixel size, \emph{etc.});
+\item initial image;
+\item regularization and hyper-parameters;
+\end{itemize}
+On output (for the final and intermediate results):
+\begin{itemize}
+\item the current/final image;
+\item the model of the data;
+\item other relevant information;
+\end{itemize}
+
+
+To make the interfacing as simple as possible, it is proposed in this document
+to use a single entry file with al input parameters and data and a single
+output file with all the results.  The flexibility of the FITS file format is
+exploited to store all these informations and data.
+
+All image reconstruction software must be able to run from the command line
+and with two arguments: the names of the input and output files (possibly with
+some flag to indicate that the software must be run in a specific way).   For
+instance:
+\begin{verbatim}
+  command --batch input output
+\end{verbatim}
+
+
+%==============================================================================
+\section{Input format}
+
+All existing algorithms take their input data in the OI-FITS format
+\citep{Pauls_et_al-2005-oifits}.  This format stores the optical
+interferometric data in FITS binary tables.  More generally, a FITS file
+\citep{Pence_et_al-2010-FITS} consists in a number of so-called header data
+units (HDU), each HDU having an header part with scalar parameters
+specified by FITS keywords\footnote{A FITS keyword consist in upper case
+  latin letters, digits, hyphen or underscore characters and has at least
+  one character and at most height characters.} and a data part.  The
+header part obeys a specific format but it is textual and easy to read for
+an human.  The data part usually consist in binary data stored in various
+forms.  In this document we only consider FITS \emph{images} (that is a
+multidimensional array of values of the same data type) and FITS
+\emph{binary tables}.  These are sufficient for our purposes.
+
+By adding FITS HDU or introducing new FITS keywords, it is possible to provide
+any additional data (\emph{e.g.} the initial image) and parameters required to
+run the image reconstruction process.  Thus, it is proposed that the input
+file be a valid OI-FITS file (resulting from the merging of all the optical
+interferometric data to process) completed by HDU with additional binary data
+needed for the reconstruction (for instance, the initial image) and with
+scalar input settings provided as the values of FITS keywords.  This is
+detailed in the following subsections.
+
+
+\subsection{Scalar input parameters}
+
+\renewcommand{\ROW}[3]{\KEYWORD{#1} & #2 &#3 \\}
+\renewcommand{\ROWTITLE}[1]{\multicolumn{3}{c}{\textbf{#1}} \\
+  Keyword & Type & Description \\}
+
+\begin{table}
+\caption{FITS keywords used to specify the input parameters.  The \emph{Image
+Parameters} are given in the HDU which stores the initial image (identified by
+the value of the \KEYWORD{INIT\_IMG} keyword), all other parameters are in the
+primary HDU. \label{tab:input-params}}
+
+\begin{tabular}{lcl}
+  \hline
+  \ROWTITLE{Data Selection}
+  \hline
+  \ROW{TARGET}{string}{Identifier of the target object to reconstruct}
+  \ROW{WAVE\_MIN}{real}{Minimum wavelength to select (in meters)}
+  \ROW{WAVE\_MAX}{real}{Maximum wavelength to select (in meters)}
+  \ROW{USE\_VIS}{logical}{Use complex visibility data if any}
+  \ROW{USE\_VIS2}{logical}{Use squared visibility data if any}
+  \ROW{USE\_T3}{logical}{Use triple visibility data if any}
+  \hline
+  \ROWTITLE{Algorithm Settings}
+  \hline
+  \ROW{INIT\_IMG}{string}{Identifier of the initial image}
+  \ROW{MAXITER}{integer}{Maximum number of iterations to run}
+  \ROW{RGL\_NAME}{string}{Name of the regularization method}
+  \ROW{RGL\_WGT}{real}{Weight of the regularization}
+  \ROW{RGL\_ALPH}{real}{Parameter $\alpha$ of the regularization}
+  \ROW{RGL\_BETA}{real}{Parameter $\beta$ of the regularization}
+  \ROW{RGL\_PRIO}{string}{Identifier of the HDU with the prior image}
+  \hline
+  \ROWTITLE{Image Parameters}
+  \hline
+  \ROW{NAXIS1}{integer}{First dimension of the image}
+  \ROW{NAXIS2}{integer}{Second dimension of the image}
+  \ROW{CDELT1}{real}{Pixel size along first dimension of the image (in radians)}
+  \ROW{CDELT2}{real}{Pixel size along second dimension of the image (in radians)}
+  \hline
+  \ROWTITLE{Algorithm Results}
+  \hline
+  \ROW{LAST\_IMG}{string}{Identifier of the final image}
+  \hline
+\end{tabular}
+\end{table}
+
+The first HDU, the so-called primary HDU, of a FITS file can only contains a,
+possibly empty, FITS image. As optical interferometric data are all stored in
+binary table, the primary HDU is almost empty. It is proposed that the input
+(scalar) parameters be provided as FITS keywords in the primary HDU. There are
+however some exceptions like the pixel size and the dimensions of the image
+which are specified by those of the initial image (see below) which may be
+stored in an other HDU.  Non-scalar parameters, for instance the prior image
+for maximum entropy regularization, are stored in dedicated HDU (as images or
+binary tables) and are identified by the value of their \KEYWORD{EXTNAME}
+keyword.  Table~\ref{tab:input-params} gives some examples of the input
+parameters.
+
+
+\subsection{Wavelength range}
+
+The primary objective is to consider monochromatic image reconstruction.  The
+interferometric data is generally available at many wavelengths.  The result
+will, in fact, be a gray image of the target built from the data in the
+wavelength range (inclusive) specified by the FITS keywords \KEYWORD{WAVE\_MIN}
+and \KEYWORD{WAVE\_MAX}.  \oops{The wavelength range is given in meters.}
+
+
+\subsection{Initial image}
+
+All reconstruction algorithms are iterative and require an initial image to
+start with. The initial image is provided as a FITS image in one of the HDU of
+the input file. The primary HDU can be used to store the initial image in the
+primary HDU (however \emph{cf.} the discussion about which image to store in
+the primary HDU). The pixel size and the dimensions of the initial image
+determine that of the sought image.  The dimensions are given by the FITS
+keywords \KEYWORD{NAXIS1} and \KEYWORD{NAXIS2} while the pixel size is given
+by the FITS keywords \KEYWORD{CDELT1} and \KEYWORD{CDELT2} (both values must
+be the same).
+
+It is not intended that the image reconstruction algorithm be able to deal
+with any world coordinate system (WCS) nor with any coordinate units.  The
+images are therefore stored according to a given WCS with given units.  First
+image axis corresponds to the right ascension (RA) and second image axis
+corresponds to the declination (DEC).  \oops{Specify the units, the
+orientation and the ordering of pixels?}  The same conventions (WCS, units and
+orientation) hold for any output image produced by the reconstruction
+algorithm.   For any external software to display correctly the images, the
+parameters of the WCS must be completely and correctly specified. \oops{This
+requires to set \KEYWORD{CRPIXn}, \KEYWORD{CRVALn}, \KEYWORD{CTYPEn}, and
+\KEYWORD{CUNITn} keywords.  \KEYWORD{CROTAn} may be omitted as its default
+value (zero) according to FITS standard is suitable for us.}
+
+%==============================================================================
+\section{Output format}
+
+It is proposed that the output format be as similar as possible as the input
+format.  The output file must provide the reconstructed image but also some
+informations for analyzing the result.  In particular, as each imaging
+algorithm may implement its own method to estimate the complex visibilities
+given the image of the object, it is necessary that the model of every fitted
+data be computed by the algorithm itself rather than by another tool.
+
+
+\subsection{Final/current image}
+
+To compare the initial and the final images, they must be stored in different
+HDU, the FITS keyword \KEYWORD{EXTNAME} is used to distinguish them.  As
+previously explained, the dimensions, pixel size and orientation of the output
+image(s) are the same as the initial image.
+
+%The value of the FITS keyword \KEYWORD{EXTNAME} is \STRING{INITIAL IMAGE} and
+%\STRING{FINAL IMAGE} for the initial and final images respectively.
+
+As most image viewers\footnote{not all softwares deal with FITS files} are
+only capable of displaying the image stored in the primary HDU, we suggest to
+store the initial image in the primary HDU for the input file but to store the
+final or current image in the primary HDU of the output file.  The idea is to
+have the most relevant image stored in the primary HDU.  For the image
+reconstruction algorithm and for any software designed to display or analyze
+the results, the different images are distinguished by their names (given by
+their \KEYWORD{EXTNAME} keyword).  \oops{OK but the last image should have a
+specific name, perhaps set \KEYWORD{LAST\_IMG} keyword in the primary HDU with
+name of the final image and let all reconstructed images be called as:
+\begin{quote}
+\KEYWORD{EXTNAME = 'OUTPUT\VARIABLE{n}'}
+\end{quote}
+with \VARIABLE{n} the iteration number.}
+
+In order to continue the iterations of a previous reconstruction run, the
+image reconstruction algorithm may be started with the final image instead of
+the initial one.   To that end, there must be some means to specify which
+image to start with for the image reconstruction software.  This is the
+purpose of the \KEYWORD{INIT\_IMG} keyword (see Table~\ref{tab:input-params})
+in the primary HDU which indicates the name of the initial image.
+
+
+
+\subsection{Model of the data}
+
+The OI-FITS format \citep{Pauls_et_al-2005-oifits} specifies that optical
+interferometric data be stored in binary tables as columns with specific
+names.  As there is no restriction that the tables only contain the columns
+specified by the standard, we propose to store the model of the data in the
+same tables by adding new columns.  The names of the new columns are listed in
+Table~\ref{tab:model-columns}.  In this way it is very easy to compare the
+actual data and their model as computed from the reconstructed image and the
+instrumental model assumed by the reconstruction algorithm.  Another advantage
+of this convention is that the same format can be exploited to store the
+values given by model fitting software.
+
+\renewcommand{\ROW}[2]{\texttt{#1} & \texttt{D(\textsl{NWAVE})} & #2 \\}
+\renewcommand{\ROWTITLE}[1]{\multicolumn{3}{c}{\textbf{#1}}\\}
+
+\begin{table}
+\caption{Colums inserted in OI-FITS binary tables to store the values given by
+the model.  \texttt{\textsl{NWAVE}} is the number of wavelengths.
+\label{tab:model-columns}}
+\begin{tabular}{lcl}
+\hline
+\hline
+\ROWTITLE{New columns in \texttt{OI\_VIS} table}
+Label & Format & Description \\
+\hline
+\ROW{VISAMPMODEL}{Model of the visibility amplitude}
+\ROW{VISPHIMODEL}{Model of the visibility phase in degrees}
+\hline
+\hline
+\ROWTITLE{New column in \texttt{OI\_VIS2} table}
+Label & Format & Description \\
+\hline
+\ROW{VIS2MODEL}{Model of the squared visibility}
+\hline
+\hline
+\ROWTITLE{New columns in \texttt{OI\_T3} table}
+Label & Format & Description \\
+\hline
+\ROW{T3AMPMODEL}{Model of the triple-product amplitude}
+\ROW{T3PHIMODEL}{Model of the triple-product phase in degrees}
+\hline
+\end{tabular}
+\end{table}
+
+\bibliographystyle{plainnat}
+\bibliography{OI-Interface}
+
+\end{document}
+

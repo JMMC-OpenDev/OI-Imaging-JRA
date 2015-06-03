@@ -1,0 +1,58 @@
+\usepackage{url}
+\usepackage{hyperref}
+
+%----------------------------------------------------------------------- COLORS
+
+\usepackage[dvipsnames,hyperref]{xcolor}
+
+%\NewColor{NAME}{MODE}{SETTINGS}
+%
+%  define a color NAME  and a \NAME{text} command to write text
+%  in given color
+\newcommand*{\NewColor}[3]{%
+  \definecolor{#1}{#2}{#3}%
+  \expandafter\def\csname#1\endcsname##1{{\color{#1}##1}}
+}
+
+%% 40 colors from KDE environement:
+\NewColor{Black}{rgb}{0.00000,0.00000,0.00000}
+\NewColor{AlmostBlack}{rgb}{0.18824,0.18824,0.18824}
+\NewColor{VeryDarkGray}{rgb}{0.34510,0.34510,0.34510}
+\NewColor{DarkGray}{rgb}{0.50196,0.50196,0.50196}
+\NewColor{MediumGray}{rgb}{0.62745,0.62745,0.62745}
+\NewColor{LightGray}{rgb}{0.76471,0.76471,0.76471}
+\NewColor{VeryLightGray}{rgb}{0.86275,0.86275,0.86275}
+\NewColor{White}{rgb}{1.00000,1.00000,1.00000}
+\NewColor{VeryDarkRed}{rgb}{0.25098,0.00000,0.00000}
+\NewColor{DarkRed}{rgb}{0.50196,0.00000,0.00000}
+\NewColor{MediumRed}{rgb}{0.75294,0.00000,0.00000}
+\NewColor{Red}{rgb}{1.00000,0.00000,0.00000}
+\NewColor{LightRed}{rgb}{1.00000,0.75294,0.75294}
+\NewColor{VeryDarkGreen}{rgb}{0.00000,0.25098,0.00000}
+\NewColor{DarkGreen}{rgb}{0.00000,0.50196,0.00000}
+\NewColor{MediumGreen}{rgb}{0.00000,0.75294,0.00000}
+\NewColor{Green}{rgb}{0.00000,1.00000,0.00000}
+\NewColor{LightGreen}{rgb}{0.75294,1.00000,0.75294}
+\NewColor{DarkBlue}{rgb}{0.00000,0.00000,0.50196}
+\NewColor{MediumBlue}{rgb}{0.00000,0.00000,0.75294}
+\NewColor{Blue}{rgb}{0.00000,0.00000,1.00000}
+\NewColor{LightBlue}{rgb}{0.75294,0.75294,1.00000}
+\NewColor{VeryDarkYellow}{rgb}{0.25098,0.25098,0.00000}
+\NewColor{DarkYellow}{rgb}{0.50196,0.50196,0.00000}
+\NewColor{MediumYellow}{rgb}{0.75294,0.75294,0.00000}
+\NewColor{Yellow}{rgb}{1.00000,1.00000,0.00000}
+\NewColor{LightYellow}{rgb}{1.00000,1.00000,0.75294}
+\NewColor{VeryDarkCyan}{rgb}{0.00000,0.25098,0.25098}
+\NewColor{DarkCyan}{rgb}{0.00000,0.50196,0.50196}
+\NewColor{MediumCyan}{rgb}{0.00000,0.75294,0.75294}
+\NewColor{Cyan}{rgb}{0.00000,1.00000,1.00000}
+\NewColor{LightCyan}{rgb}{0.75294,1.00000,1.00000}
+\NewColor{DarkMagenta}{rgb}{0.50196,0.00000,0.50196}
+\NewColor{MediumMagenta}{rgb}{0.75294,0.00000,0.75294}
+\NewColor{Magenta}{rgb}{1.00000,0.00000,1.00000}
+\NewColor{LightMagenta}{rgb}{1.00000,0.75294,1.00000}
+\NewColor{DarkOrange}{rgb}{0.75294,0.34510,0.00000}
+\NewColor{Orange}{rgb}{1.00000,0.50196,0.00000}
+\NewColor{LightOrange}{rgb}{1.00000,0.65882,0.34510}
+\NewColor{VeryLightOrange}{rgb}{0.99216,0.86275,0.65882}
+
