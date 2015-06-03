@@ -230,6 +230,34 @@ keyword.  Table~\ref{tab:input-params} gives some examples of the input
 parameters.
 
 
+\subsection{Data selection}
+
+To keep things simple, any sophisticated selection, merging or editing of
+the data should be done by a separate tool.  The image reconstruction
+softwares shall assume that they receive as their inputs clean data.  There
+are however a few parameters devoted to the selection of data.  The
+\KEYWORD{TARGET} keyword is set with the identifier of the target object to
+reconstruct.  The value of this keyword should match one of the identifiers
+in the column \KEYWORD{TARGET\_ID} in OI-TARGET binary table of the OI-FITS
+file.  In order to restrict the accounting of some type of interferometric
+data, keywords \KEYWORD{USE\_VIS}, \KEYWORD{USE\_VIS2} and
+\KEYWORD{USE\_T3} should be set with a logical value depending whether to
+use complex visibility, the squared visibility, and the triple-product data
+if any.  Not all algorithms can use all type of data and the value of these
+keywords should be set (in the output file) so as to reflect what was
+really used.
+
+\oops{Shall we have \KEYWORD{USE\_VISA}/\KEYWORD{USE\_VISP} to distinguish
+  amplitude/phase data? And likely, \KEYWORD{USE\_T3A}/\KEYWORD{USE\_T3P}
+  for the triple-product data?}
+
+Wavelength selection is discussed in the next section.
+
+\oops{Open question: do the image reconstruction software have to honor the
+  \KEYWORD{FLAG} column of the OI data?  Personnaly (Éric) I think that the
+  answer is yes.  Then the meaning of this flag should be recalled.}
+
+
 \subsection{Wavelength range}
 
 The primary objective is to consider monochromatic image reconstruction.  The
@@ -252,17 +280,32 @@ by the FITS keywords \KEYWORD{CDELT1} and \KEYWORD{CDELT2} (both values must
 be the same).
 
 It is not intended that the image reconstruction algorithm be able to deal
-with any world coordinate system (WCS) nor with any coordinate units.  The
-images are therefore stored according to a given WCS with given units.  First
-image axis corresponds to the right ascension (RA) and second image axis
-corresponds to the declination (DEC).  \oops{Specify the units, the
-orientation and the ordering of pixels?}  The same conventions (WCS, units and
-orientation) hold for any output image produced by the reconstruction
-algorithm.   For any external software to display correctly the images, the
-parameters of the WCS must be completely and correctly specified. \oops{This
-requires to set \KEYWORD{CRPIXn}, \KEYWORD{CRVALn}, \KEYWORD{CTYPEn}, and
-\KEYWORD{CUNITn} keywords.  \KEYWORD{CROTAn} may be omitted as its default
-value (zero) according to FITS standard is suitable for us.}
+with any possible world coordinate system (WCS) nor with any possible
+coordinate units.  The images are therefore stored according to a given WCS
+with given units.  First image axis corresponds to the right ascension (RA)
+and second image axis corresponds to the declination (DEC).  \oops{Specify
+  the units, the orientation and the ordering of pixels?}  The same
+conventions (WCS, units and orientation) hold for any output image produced
+by the reconstruction algorithm.  For any external software to display
+correctly the images, the parameters of the WCS must be completely and
+correctly specified. \oops{This requires to set \KEYWORD{CRPIXn},
+  \KEYWORD{CRVALn}, \KEYWORD{CTYPEn}, and \KEYWORD{CUNITn} keywords.  Other
+  WCS keywords like \KEYWORD{CROTAn},
+  \KEYWORD{PC\VARIABLE{i}\_\VARIABLE{j}},
+  \KEYWORD{DC\VARIABLE{i}\_\VARIABLE{j}}, should not be specified as their
+  default values (according to FITS standard) are suitable for us.}
+
+\oops{Another issue: for most reconstruction software if not all, what is
+  relevant is the relative coordinates not the absolute ones.  We may
+  specify that the reference pixel given by keywords
+  \KEYWORD{CRPIX\VARIABLE{i}} indicate where (in pixel units) is the center
+  of the field of view (FOV) and that, by default, this is the geometrical
+  center of the FOV.  Then the pixel size is given by the keywords
+  \KEYWORD{CDELT\VARIABLE{i}} which must have the same absolute value (the
+  sign can be used to cope with the orientation, \emph{explain how}).  The
+  keywords \KEYWORD{CRVAL\VARIABLE{i}} can, optionally, be specified to
+  indicate the absolute coordinates of the center of the FOV and to convert
+  relative coordinates to absolute ones.}
 
 %==============================================================================
 \section{Output format}
@@ -354,6 +397,21 @@ Label & Format & Description \\
 \end{tabular}
 \end{table}
 
+%==============================================================================
+\appendix
+\section{Glossary}
+
+\begin{description}
+\item[DEC] Declination;
+\item[FITS] Flexible Image Transport System;
+\item[FOC] Field of view;
+\item[GUI] Graphical User Interface;
+\item[OI-FITS] Optical Interferometric exchange data format;
+\item[RA] Right Ascension;
+\item[WCS] World Coordinate System;
+\end{description}
+
+%==============================================================================
 \bibliographystyle{plainnat}
 \bibliography{OI-Interface}
 
