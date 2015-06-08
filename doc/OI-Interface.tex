@@ -373,13 +373,15 @@ The OI-FITS format \citep{Pauls_et_al-2005-oifits} specifies that
 optical interferometric data be stored in binary tables as columns
 with specific names.  As there is no restriction that the tables only
 contain the columns specified by the standard, we propose to store the
-model of the data in the same tables by adding new columns.  The names
-of the new columns are listed in Table~\ref{tab:model-columns}.  In
-this way it is very easy to compare the actual data and the
-corresponding model values as computed from the reconstructed image
-and the instrumental model assumed by the reconstruction algorithm.
-Another advantage of this convention is that the same format can be
-exploited to store the values given by model fitting software.
+model of the data in the same tables by adding new columns. The
+additional columns have the prefix \verb+NS_+ to distinguish them from
+the columns defined by the OIFITS standard. The names of the new
+columns are listed in Table~\ref{tab:model-columns}.  In this way it
+is very easy to compare the actual data and the corresponding model
+values as computed from the reconstructed image and the instrumental
+model assumed by the reconstruction algorithm.  Another advantage of
+this convention is that the same format can be exploited to store the
+values given by model fitting software.
 
 \renewcommand{\ROW}[2]{\texttt{#1} & \texttt{D(\textsl{NWAVE})} & #2 \\}
 \renewcommand{\ROWTITLE}[1]{\multicolumn{3}{c}{\textbf{#1}}\\}
@@ -394,21 +396,21 @@ the model.  \texttt{\textsl{NWAVE}} is the number of wavelengths.
 \ROWTITLE{New columns in \texttt{OI\_VIS} table}
 Label & Format & Description \\
 \hline
-\ROW{VISAMPMODEL}{Model of the visibility amplitude}
-\ROW{VISPHIMODEL}{Model of the visibility phase in degrees}
+\ROW{NS\_VISAMPMODEL}{Model of the visibility amplitude}
+\ROW{NS\_VISPHIMODEL}{Model of the visibility phase in degrees}
 \hline
 \hline
 \ROWTITLE{New column in \texttt{OI\_VIS2} table}
 Label & Format & Description \\
 \hline
-\ROW{VIS2MODEL}{Model of the squared visibility}
+\ROW{NS\_VIS2MODEL}{Model of the squared visibility}
 \hline
 \hline
 \ROWTITLE{New columns in \texttt{OI\_T3} table}
 Label & Format & Description \\
 \hline
-\ROW{T3AMPMODEL}{Model of the triple-product amplitude}
-\ROW{T3PHIMODEL}{Model of the triple-product phase in degrees}
+\ROW{NS\_T3AMPMODEL}{Model of the triple-product amplitude}
+\ROW{NS\_T3PHIMODEL}{Model of the triple-product phase in degrees}
 \hline
 \end{tabular}
 \end{table}
