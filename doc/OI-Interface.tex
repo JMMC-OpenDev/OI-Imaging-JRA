@@ -398,6 +398,24 @@ Label & Format & Description \\
 \end{table}
 
 %==============================================================================
+\section{Command line tools}
+
+It would be useful to provide command line tools for creating and
+editing input files (e.g. to change a parameter), in addition to the
+graphical user interface. Such tools would be useful for scripting
+tests, for example.
+
+Some example command lines are shown below. The first creates a new input
+file named \verb+myinput.fits+ and sets the initial image from the
+primary HDU of \verb+myimage.fits+. The second command changes
+parameter values in an existing file.
+
+\begin{verbatim}
+oi-image create myinput.fits CDELT1=0.25 MAXITER=200 INIT_IMG=myimage.fits
+oi-image edit myinput.fits RGL_ALPH=1e-3 USE_T3A=F
+\end{verbatim}
+
+%==============================================================================
 \appendix
 \section{Glossary}
 
