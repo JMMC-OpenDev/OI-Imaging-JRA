@@ -68,8 +68,8 @@ to be developed. This document aims at specifying a common software interface
 for image reconstruction algorithms.
 
 On the image reconstruction side, this involves specifying the inputs
-exactly: OI-FITS file for the data, the initial image, and other
-settings such as the regularization and its
+completely and precisely: OI-FITS file for the data, the initial
+image, and other settings such as the regularization and its
 hyper-parameters.\footnote{In a previous discussion, John Young
   suggested using a text file with a simple format to give the values
   of the input parameters. The format of this file must be simple and
@@ -79,7 +79,7 @@ hyper-parameters.\footnote{In a previous discussion, John Young
 the image reconstruction algorithm should start the reconstruction
 producing two kind of outputs:
 \begin{description}
-  \item[Intermediate outputs:]  These consist in iteration information
+  \item[Intermediate outputs:]  These consist of iteration information
   printed on the standard output (for instance)  and captured by the GUI and
   also the current solution in the form of an image, the corresponding model
   of the measurements (\emph{e.g.}, the complex visibilities).  These outputs
@@ -124,7 +124,8 @@ To summarize, on entry:
 \item initial image;
 \item regularization and hyper-parameters;
 \end{itemize}
-On output (for the final and intermediate results):
+On output (for the final and intermediate results), \emph{in addition
+  to the above list}:
 \begin{itemize}
 \item the current/final image;
 \item the model of the data;
@@ -174,6 +175,11 @@ reconstruction (for instance, the initial image) and with scalar input
 settings provided as the values of FITS keywords.  This is detailed in
 the following subsections.
 
+The HDUs that are specific to the interface specification described in
+this document have \KEYWORD{EXTNAME} values prefixed with
+\STRING{IMAGE-OI}. This is to distinguish them from OIFITS HDUs, which use the
+prefix \STRING{OI\_}.
+
 
 \subsection{Scalar input parameters}
 
@@ -186,7 +192,8 @@ the following subsections.
   \emph{Image Parameters} are stored in the HDU which contains the
   initial image. This HDU is specified by the value of the
   \KEYWORD{INIT\_IMG} keyword, which gives its \KEYWORD{EXTNAME}. All
-  other parameters are in the primary HDU. \label{tab:input-params}}
+  other parameters are in a binary table HDU with \KEYWORD{EXTNAME} of
+  \STRING{IMAGE-OI INPUT PARAM}. \label{tab:input-params}}
 
 \begin{tabular}{lcl}
   \hline
@@ -223,16 +230,17 @@ the following subsections.
 \end{tabular}
 \end{table}
 
-The first HDU, the so-called primary HDU, of a FITS file can only contain a,
-possibly empty, FITS image. As optical interferometric data are all stored in
-binary tables, the primary HDU is almost empty. It is proposed that the input
-(scalar) parameters be provided as FITS keywords in the primary HDU. There are
-however some exceptions like the pixel size and the dimensions of the image
-which are specified by those of the initial image (see below) which may be
-stored in another HDU.  Non-scalar parameters, for instance the prior image
-for maximum entropy regularization, are stored in dedicated HDU (as images or
-binary tables) and are identified by the value of their \KEYWORD{EXTNAME}
-keyword.  Table~\ref{tab:input-params} gives some examples of the input
+In version 1 of OIFITS, the first (primary) HDU is almost
+empty. However, the draft version 2 of OIFITS introduces primary
+header keywords summarizing the data and giving its provenance. We
+propose, therefore, storing the scalar image reconstruction input
+parameters in a separate HDU. In anticipation of perhaps needing to
+store vector parameters in future, this HDU shall be a binary table
+HDU. This binary table shall contain all of the non-image parameters,
+with the exception of the pixel size and the dimensions of the
+reconstructed image which are specified by those of the initial image
+(see below), itself stored in a dedicated (image)
+HDU. Table~\ref{tab:input-params} gives some examples of the input
 parameters.
 
 
@@ -327,7 +335,7 @@ format.  The output file must provide the reconstructed image but also some
 information for analyzing the result.  In particular, as each imaging
 algorithm may implement its own method for estimate the complex visibilities
 given the image of the object, it is necessary that the model of every fitted
-data be computed by the algorithm itself rather than by another tool.
+data point be computed by the algorithm itself rather than by another tool.
 
 \subsection{Input parameters}
 
@@ -335,6 +343,11 @@ The output file shall contain a copy of the input parameters. These
 shall be stored in the same way as in the input file, except that the
 initial image is not stored in the primary HDU (this location is
 reserved for the final/current image as explained below).
+
+The image reconstruction software shall write out values for all of
+the input parameters that it accepts, not just those that were
+provided in the input file. Thus the output file will contain default
+or automatically-chosen values for the remaining parameters.
 
 \oops{Need to define conventions for EXTNAME of all image HDUs}
 
@@ -373,7 +386,17 @@ purpose of the \KEYWORD{INIT\_IMG} keyword (see
 Table~\ref{tab:input-params}) in the primary HDU which indicates the
 name of the initial image.
 
+\subsubsection{Output parameters}
 
+Any scalar output parameters from the image reconstruction shall be
+stored in a binary table HDU with \KEYWORD{EXTNAME} of
+\STRING{OI-IMAGE OUTPUT PARAM}. Examples of scalar outputs include
+$\chi^2$, any regularization parameters estimated from the data, and
+any model parameters that are not image pixels (for example stellar
+disk parameters in SPARCO).
+
+\oops{Need to list standard output parameters in a table. Include
+  something to identify the algorithm that was used?}
 
 \subsection{Model of the data}
 
@@ -382,7 +405,7 @@ optical interferometric data be stored in binary tables as columns
 with specific names.  As there is no restriction that the tables only
 contain the columns specified by the standard, we propose to store the
 model of the data in the same tables by adding new columns. The
-additional columns have the prefix \verb+NS_+ to distinguish them from
+additional columns have the prefix \STRING{NS\_} to distinguish them from
 the columns defined by the OIFITS standard. The names of the new
 columns are listed in Table~\ref{tab:model-columns}.  In this way it
 is very easy to compare the actual data and the corresponding model
