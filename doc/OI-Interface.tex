@@ -329,6 +329,14 @@ algorithm may implement its own method for estimate the complex visibilities
 given the image of the object, it is necessary that the model of every fitted
 data be computed by the algorithm itself rather than by another tool.
 
+\subsection{Input parameters}
+
+The output file shall contain a copy of the input parameters. These
+shall be stored in the same way as in the input file, except that the
+initial image is not stored in the primary HDU (this location is
+reserved for the final/current image as explained below).
+
+\oops{Need to define conventions for EXTNAME of all image HDUs}
 
 \subsection{Final/current image}
 
