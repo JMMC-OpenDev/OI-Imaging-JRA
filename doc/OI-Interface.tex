@@ -42,11 +42,11 @@
 
 \title{Interface to Image Reconstruction}
 
-\author{Éric Thiébaut$^1$, Jonathan Léger$^1$, Micehl Tallon$^1$, John
-  Young$^2$ Gilles Duvert$^3$, Guillaume Mella$^3$, Laurent Bourges$^3$ \&
+\author{Éric Thiébaut$^1$, Jonathan Léger$^1$, Michel Tallon$^1$, John
+  Young$^2$, Gilles Duvert$^3$, Guillaume Mella$^3$, Laurent Bourges$^3$ \&
   Martin Vannier$^4$}
 
-\affil{$^1$CRAL, $^2$Cambridge University, $^3$JMMC/IPAG, $^4$Lagrange}
+\affil{$^1$CRAL, $^2$University of Cambridge, $^3$JMMC/IPAG, $^4$Lagrange}
 
 
 \date{\today}
@@ -67,17 +67,19 @@ interaction between these two pieces of software under these constraints has
 to be developed. This document aims at specifying a common software interface
 for image reconstruction algorithms.
 
-On the image reconstruction side, this involves specifying exactly the inputs:
-OI-FITS file for the data, the initial image, and other settings such as the
-regularization and its hyper-parameters.\footnote{In a previous discussion,
-John Young suggested to have a text file with a simple format to gives the
-values of the input parameters. The format of this file must be simple and
-such that it can be easily edited by a human and easily read by a software.
-Here a different proposition is made which exploits the flexibility of the
-FITS format.} Given these inputs, the image reconstruction algorithm should
-start the reconstruction producing two kind of outputs:
+On the image reconstruction side, this involves specifying the inputs
+completely and precisely: OI-FITS file for the data, the initial
+image, and other settings such as the regularization and its
+hyper-parameters.\footnote{In a previous discussion, John Young
+  suggested using a text file with a simple format to give the values
+  of the input parameters. The format of this file must be simple and
+  such that it can be easily edited by a human and easily read by a
+  software program.  Here a different proposition is made which
+  exploits the flexibility of the FITS format.} Given these inputs,
+the image reconstruction algorithm should start the reconstruction
+producing two kind of outputs:
 \begin{description}
-  \item[Intermediate outputs:]  These consist in iteration informations
+  \item[Intermediate outputs:]  These consist of iteration information
   printed on the standard output (for instance)  and captured by the GUI and
   also the current solution in the form of an image, the corresponding model
   of the measurements (\emph{e.g.}, the complex visibilities).  These outputs
@@ -99,9 +101,10 @@ A few related points have to be considered:
   so as to make sure they do release all their resources (no zombie process,
   undetached shared memory, etc.).
 
-  \item Restarting an image reconstruction (to continue the iterations or
-  perhaps with a few settings changed) should simply be a matter to re-start
-  the algorithm with, as its input image, the last produced image.
+  \item Restarting an image reconstruction (to continue the iterations
+    or perhaps with a few settings changed) should simply be a matter
+    of re-starting the algorithm with, as its input image, the last
+    image produced.
 
   \item  In case of errors, we must adopt some kind of conventions to make
   sure that the GUI can properly account for the errors.
@@ -121,7 +124,8 @@ To summarize, on entry:
 \item initial image;
 \item regularization and hyper-parameters;
 \end{itemize}
-On output (for the final and intermediate results):
+On output (for the final and intermediate results), \emph{in addition
+  to the above list}:
 \begin{itemize}
 \item the current/final image;
 \item the model of the data;
@@ -129,9 +133,10 @@ On output (for the final and intermediate results):
 \end{itemize}
 
 
-To make the interfacing as simple as possible, it is proposed in this document
-to use a single entry file with al input parameters and data and a single
-output file with all the results.  The flexibility of the FITS file format is
+To make the interfacing as simple as possible, it is proposed in this
+document to use a single entry file containing all input parameters
+and data and a single output file with all the results (either
+intermediate or final).  The flexibility of the FITS file format is
 exploited to store all these informations and data.
 
 All image reconstruction software must be able to run from the command line
@@ -149,25 +154,31 @@ instance:
 All existing algorithms take their input data in the OI-FITS format
 \citep{Pauls_et_al-2005-oifits}.  This format stores the optical
 interferometric data in FITS binary tables.  More generally, a FITS file
-\citep{Pence_et_al-2010-FITS} consists in a number of so-called header data
+\citep{Pence_et_al-2010-FITS} consists of a number of so-called header data
 units (HDU), each HDU having an header part with scalar parameters
-specified by FITS keywords\footnote{A FITS keyword consist in upper case
+specified by FITS keywords\footnote{A FITS keyword consists of upper case
   latin letters, digits, hyphen or underscore characters and has at least
-  one character and at most height characters.} and a data part.  The
+  one character and at most 8 characters.} and a data part.  The
 header part obeys a specific format but it is textual and easy to read for
-an human.  The data part usually consist in binary data stored in various
+an human.  The data part usually consists of binary data stored in various
 forms.  In this document we only consider FITS \emph{images} (that is a
 multidimensional array of values of the same data type) and FITS
 \emph{binary tables}.  These are sufficient for our purposes.
 
-By adding FITS HDU or introducing new FITS keywords, it is possible to provide
-any additional data (\emph{e.g.} the initial image) and parameters required to
-run the image reconstruction process.  Thus, it is proposed that the input
-file be a valid OI-FITS file (resulting from the merging of all the optical
-interferometric data to process) completed by HDU with additional binary data
-needed for the reconstruction (for instance, the initial image) and with
-scalar input settings provided as the values of FITS keywords.  This is
-detailed in the following subsections.
+By adding FITS HDU or introducing new FITS keywords, it is possible to
+provide any additional data (\emph{e.g.} the initial image) and
+parameters required to run the image reconstruction process.  Thus, it
+is proposed that the input file be a valid OI-FITS file (resulting
+from the merging of all the optical interferometric data to process)
+with the addition of HDU containing further binary data needed for the
+reconstruction (for instance, the initial image) and with scalar input
+settings provided as the values of FITS keywords.  This is detailed in
+the following subsections.
+
+The HDUs that are specific to the interface specification described in
+this document have \KEYWORD{EXTNAME} values prefixed with
+\STRING{IMAGE-OI}. This is to distinguish them from OIFITS HDUs, which use the
+prefix \STRING{OI\_}.
 
 
 \subsection{Scalar input parameters}
@@ -177,21 +188,23 @@ detailed in the following subsections.
   Keyword & Type & Description \\}
 
 \begin{table}
-\caption{FITS keywords used to specify the input parameters.  The \emph{Image
-Parameters} are given in the HDU which stores the initial image (identified by
-the value of the \KEYWORD{INIT\_IMG} keyword), all other parameters are in the
-primary HDU. \label{tab:input-params}}
+\caption{FITS keywords used to specify the input parameters.  The
+  \emph{Image Parameters} are stored in the HDU which contains the
+  initial image. This HDU is specified by the value of the
+  \KEYWORD{INIT\_IMG} keyword, which gives its \KEYWORD{EXTNAME}. All
+  other parameters are in a binary table HDU with \KEYWORD{EXTNAME} of
+  \STRING{IMAGE-OI INPUT PARAM}. \label{tab:input-params}}
 
 \begin{tabular}{lcl}
   \hline
   \ROWTITLE{Data Selection}
   \hline
-  \ROW{TARGET}{string}{Identifier of the target object to reconstruct}
+  \ROW{TARGET}{\oops{string}}{Identifier of the target object to reconstruct}
   \ROW{WAVE\_MIN}{real}{Minimum wavelength to select (in meters)}
   \ROW{WAVE\_MAX}{real}{Maximum wavelength to select (in meters)}
   \ROW{USE\_VIS}{logical}{Use complex visibility data if any}
   \ROW{USE\_VIS2}{logical}{Use squared visibility data if any}
-  \ROW{USE\_T3}{logical}{Use triple visibility data if any}
+  \ROW{USE\_T3}{logical}{Use triple product data if any}
   \hline
   \ROWTITLE{Algorithm Settings}
   \hline
@@ -217,39 +230,44 @@ primary HDU. \label{tab:input-params}}
 \end{tabular}
 \end{table}
 
-The first HDU, the so-called primary HDU, of a FITS file can only contains a,
-possibly empty, FITS image. As optical interferometric data are all stored in
-binary table, the primary HDU is almost empty. It is proposed that the input
-(scalar) parameters be provided as FITS keywords in the primary HDU. There are
-however some exceptions like the pixel size and the dimensions of the image
-which are specified by those of the initial image (see below) which may be
-stored in an other HDU.  Non-scalar parameters, for instance the prior image
-for maximum entropy regularization, are stored in dedicated HDU (as images or
-binary tables) and are identified by the value of their \KEYWORD{EXTNAME}
-keyword.  Table~\ref{tab:input-params} gives some examples of the input
+In version 1 of OIFITS, the first (primary) HDU is almost
+empty. However, the draft version 2 of OIFITS introduces primary
+header keywords summarizing the data and giving its provenance. We
+propose, therefore, storing the scalar image reconstruction input
+parameters in a separate HDU. In anticipation of perhaps needing to
+store vector parameters in future, this HDU shall be a binary table
+HDU. This binary table shall contain all of the non-image parameters,
+with the exception of the pixel size and the dimensions of the
+reconstructed image which are specified by those of the initial image
+(see below), itself stored in a dedicated (image)
+HDU. Table~\ref{tab:input-params} gives some examples of the input
 parameters.
 
 
 \subsection{Data selection}
 
-To keep things simple, any sophisticated selection, merging or editing of
-the data should be done by a separate tool.  The image reconstruction
-softwares shall assume that they receive as their inputs clean data.  There
-are however a few parameters devoted to the selection of data.  The
-\KEYWORD{TARGET} keyword is set with the identifier of the target object to
-reconstruct.  The value of this keyword should match one of the identifiers
-in the column \KEYWORD{TARGET\_ID} in OI-TARGET binary table of the OI-FITS
-file.  In order to restrict the accounting of some type of interferometric
-data, keywords \KEYWORD{USE\_VIS}, \KEYWORD{USE\_VIS2} and
-\KEYWORD{USE\_T3} should be set with a logical value depending whether to
-use complex visibility, the squared visibility, and the triple-product data
-if any.  Not all algorithms can use all type of data and the value of these
-keywords should be set (in the output file) so as to reflect what was
-really used.
+To keep things simple, any sophisticated selection, merging or editing
+of the data should be done by a separate tool.  The image
+reconstruction software applications shall assume that they receive
+clean input data.  There are however a few parameters devoted to the
+selection of data.  The \KEYWORD{TARGET} keyword is set with the
+identifier of the target object to reconstruct.  The value of this
+keyword should match one of the identifiers in the column
+\KEYWORD{TARGET\_ID} in the OI\_TARGET binary table of the OI-FITS
+file.  In order to restrict the types of interferometric data used for
+the reconstruction, keywords \KEYWORD{USE\_VIS}, \KEYWORD{USE\_VIS2}
+and \KEYWORD{USE\_T3} should be set with logical values specifying
+whether to use the complex visibility, the squared visibility, and the
+triple-product data if any.  Not all algorithms can use all types of
+data and the values of these keywords should be set (in the output
+file) so as to reflect what was really used.
 
 \oops{Shall we have \KEYWORD{USE\_VISA}/\KEYWORD{USE\_VISP} to distinguish
   amplitude/phase data? And likely, \KEYWORD{USE\_T3A}/\KEYWORD{USE\_T3P}
   for the triple-product data?}
+
+\oops{Does \KEYWORD{TARGET} specify the integer \KEYWORD{TARGET\_ID}
+  or the target name string?}
 
 Wavelength selection is discussed in the next section.
 
@@ -261,7 +279,7 @@ Wavelength selection is discussed in the next section.
 \subsection{Wavelength range}
 
 The primary objective is to consider monochromatic image reconstruction.  The
-interferometric data is generally available at many wavelengths.  The result
+interferometric data are generally available at many wavelengths.  The result
 will, in fact, be a gray image of the target built from the data in the
 wavelength range (inclusive) specified by the FITS keywords \KEYWORD{WAVE\_MIN}
 and \KEYWORD{WAVE\_MAX}.  \oops{The wavelength range is given in meters.}
@@ -269,100 +287,131 @@ and \KEYWORD{WAVE\_MAX}.  \oops{The wavelength range is given in meters.}
 
 \subsection{Initial image}
 
-All reconstruction algorithms are iterative and require an initial image to
-start with. The initial image is provided as a FITS image in one of the HDU of
-the input file. The primary HDU can be used to store the initial image in the
-primary HDU (however \emph{cf.} the discussion about which image to store in
-the primary HDU). The pixel size and the dimensions of the initial image
-determine that of the sought image.  The dimensions are given by the FITS
-keywords \KEYWORD{NAXIS1} and \KEYWORD{NAXIS2} while the pixel size is given
-by the FITS keywords \KEYWORD{CDELT1} and \KEYWORD{CDELT2} (both values must
-be the same).
+All reconstruction algorithms are iterative and require an initial
+image to start with. The initial image is provided as a FITS image in
+one of the HDU of the input file. The primary HDU can be used to store
+the initial image (however \emph{cf.} the discussion about which image
+to store in the primary HDU). The pixel size and the dimensions of the
+initial image determine that of the reconstructed image.  The
+dimensions are given by the FITS keywords \KEYWORD{NAXIS1} and
+\KEYWORD{NAXIS2} while the pixel size is given by the FITS keywords
+\KEYWORD{CDELT1} and \KEYWORD{CDELT2} (both values must be the same).
 
-It is not intended that the image reconstruction algorithm be able to deal
-with any possible world coordinate system (WCS) nor with any possible
-coordinate units.  The images are therefore stored according to a given WCS
-with given units.  First image axis corresponds to the right ascension (RA)
-and second image axis corresponds to the declination (DEC).  \oops{Specify
-  the units, the orientation and the ordering of pixels?}  The same
-conventions (WCS, units and orientation) hold for any output image produced
-by the reconstruction algorithm.  For any external software to display
-correctly the images, the parameters of the WCS must be completely and
-correctly specified. \oops{This requires to set \KEYWORD{CRPIXn},
-  \KEYWORD{CRVALn}, \KEYWORD{CTYPEn}, and \KEYWORD{CUNITn} keywords.  Other
-  WCS keywords like \KEYWORD{CROTAn},
+It is not intended that the image reconstruction algorithm be able to
+deal with any possible world coordinate system (WCS) nor with any
+possible coordinate units.  The images are therefore stored according
+to a given WCS with given units.  First image axis corresponds to the
+right ascension (RA) and second image axis corresponds to the
+declination (DEC).  \oops{Specify the units, the orientation and the
+  ordering of pixels?}  The same conventions (WCS, units and
+orientation) hold for any output image produced by the reconstruction
+algorithm.  For any external software to correctly display the images,
+the parameters of the WCS must be completely and correctly
+specified. \oops{This requires setting the \KEYWORD{CRPIXn},
+  \KEYWORD{CRVALn}, \KEYWORD{CTYPEn}, and \KEYWORD{CUNITn} keywords.
+  Other WCS keywords like \KEYWORD{CROTAn},
   \KEYWORD{PC\VARIABLE{i}\_\VARIABLE{j}},
-  \KEYWORD{DC\VARIABLE{i}\_\VARIABLE{j}}, should not be specified as their
-  default values (according to FITS standard) are suitable for us.}
+  \KEYWORD{DC\VARIABLE{i}\_\VARIABLE{j}}, should not be specified as
+  their default values (according to FITS standard) are suitable for
+  us.}
 
-\oops{Another issue: for most reconstruction software if not all, what is
-  relevant is the relative coordinates not the absolute ones.  We may
-  specify that the reference pixel given by keywords
-  \KEYWORD{CRPIX\VARIABLE{i}} indicate where (in pixel units) is the center
-  of the field of view (FOV) and that, by default, this is the geometrical
+\oops{Another issue: for most, if not all, reconstruction software,
+  what is relevant is the relative coordinates not the absolute ones.
+  We may specify that the reference pixel given by keywords
+  \KEYWORD{CRPIX\VARIABLE{i}} (in pixel units) be the center of the
+  field of view (FOV) and that, by default, this is the geometrical
   center of the FOV.  Then the pixel size is given by the keywords
-  \KEYWORD{CDELT\VARIABLE{i}} which must have the same absolute value (the
-  sign can be used to cope with the orientation, \emph{explain how}).  The
-  keywords \KEYWORD{CRVAL\VARIABLE{i}} can, optionally, be specified to
-  indicate the absolute coordinates of the center of the FOV and to convert
-  relative coordinates to absolute ones.}
+  \KEYWORD{CDELT\VARIABLE{i}} which must have the same absolute value
+  (the sign can be used to cope with the orientation, \emph{explain
+    how}).  The keywords \KEYWORD{CRVAL\VARIABLE{i}} can, optionally,
+  be specified to indicate the absolute coordinates of the center of
+  the FOV and to convert relative coordinates to absolute ones.}
 
 %==============================================================================
 \section{Output format}
 
 It is proposed that the output format be as similar as possible as the input
 format.  The output file must provide the reconstructed image but also some
-informations for analyzing the result.  In particular, as each imaging
-algorithm may implement its own method to estimate the complex visibilities
+information for analyzing the result.  In particular, as each imaging
+algorithm may implement its own method for estimate the complex visibilities
 given the image of the object, it is necessary that the model of every fitted
-data be computed by the algorithm itself rather than by another tool.
+data point be computed by the algorithm itself rather than by another tool.
 
+\subsection{Input parameters}
+
+The output file shall contain a copy of the input parameters. These
+shall be stored in the same way as in the input file, except that the
+initial image is not stored in the primary HDU (this location is
+reserved for the final/current image as explained below).
+
+The image reconstruction software shall write out values for all of
+the input parameters that it accepts, not just those that were
+provided in the input file. Thus the output file will contain default
+or automatically-chosen values for the remaining parameters.
+
+\oops{Need to define conventions for EXTNAME of all image HDUs}
 
 \subsection{Final/current image}
 
 To compare the initial and the final images, they must be stored in different
 HDU, the FITS keyword \KEYWORD{EXTNAME} is used to distinguish them.  As
-previously explained, the dimensions, pixel size and orientation of the output
+explained previously, the dimensions, pixel size and orientation of the output
 image(s) are the same as the initial image.
 
 %The value of the FITS keyword \KEYWORD{EXTNAME} is \STRING{INITIAL IMAGE} and
 %\STRING{FINAL IMAGE} for the initial and final images respectively.
 
-As most image viewers\footnote{not all softwares deal with FITS files} are
-only capable of displaying the image stored in the primary HDU, we suggest to
-store the initial image in the primary HDU for the input file but to store the
-final or current image in the primary HDU of the output file.  The idea is to
-have the most relevant image stored in the primary HDU.  For the image
-reconstruction algorithm and for any software designed to display or analyze
-the results, the different images are distinguished by their names (given by
-their \KEYWORD{EXTNAME} keyword).  \oops{OK but the last image should have a
-specific name, perhaps set \KEYWORD{LAST\_IMG} keyword in the primary HDU with
-name of the final image and let all reconstructed images be called as:
+As most image viewers\footnote{not all softwares deal with FITS files}
+are only capable of displaying the image stored in the primary HDU, we
+suggest storing the initial image in the primary HDU of the input
+file, but storing the final or current image in the primary HDU of the
+output file.  The idea is to have the most relevant image stored in
+the primary HDU.  For the image reconstruction algorithm and for any
+software designed to display or analyze the results, the different
+images are distinguished by their names (given by their
+\KEYWORD{EXTNAME} keyword).  \oops{OK but the last image should have a
+  specific name, perhaps set \KEYWORD{LAST\_IMG} keyword in the
+  primary HDU with name of the final image and let all reconstructed
+  images be called:
 \begin{quote}
 \KEYWORD{EXTNAME = 'OUTPUT\VARIABLE{n}'}
 \end{quote}
 with \VARIABLE{n} the iteration number.}
 
-In order to continue the iterations of a previous reconstruction run, the
-image reconstruction algorithm may be started with the final image instead of
-the initial one.   To that end, there must be some means to specify which
-image to start with for the image reconstruction software.  This is the
-purpose of the \KEYWORD{INIT\_IMG} keyword (see Table~\ref{tab:input-params})
-in the primary HDU which indicates the name of the initial image.
+In order to continue the iterations of a previous reconstruction run,
+the image reconstruction algorithm may be started with the final image
+instead of the initial one.  To that end, there must be some means to
+specify the starting image for the reconstruction.  This is the
+purpose of the \KEYWORD{INIT\_IMG} keyword (see
+Table~\ref{tab:input-params}) in the primary HDU which indicates the
+name of the initial image.
 
+\subsubsection{Output parameters}
 
+Any scalar output parameters from the image reconstruction shall be
+stored in a binary table HDU with \KEYWORD{EXTNAME} of
+\STRING{OI-IMAGE OUTPUT PARAM}. Examples of scalar outputs include
+$\chi^2$, any regularization parameters estimated from the data, and
+any model parameters that are not image pixels (for example stellar
+disk parameters in SPARCO).
+
+\oops{Need to list standard output parameters in a table. Include
+  something to identify the algorithm that was used?}
 
 \subsection{Model of the data}
 
-The OI-FITS format \citep{Pauls_et_al-2005-oifits} specifies that optical
-interferometric data be stored in binary tables as columns with specific
-names.  As there is no restriction that the tables only contain the columns
-specified by the standard, we propose to store the model of the data in the
-same tables by adding new columns.  The names of the new columns are listed in
-Table~\ref{tab:model-columns}.  In this way it is very easy to compare the
-actual data and their model as computed from the reconstructed image and the
-instrumental model assumed by the reconstruction algorithm.  Another advantage
-of this convention is that the same format can be exploited to store the
+The OI-FITS format \citep{Pauls_et_al-2005-oifits} specifies that
+optical interferometric data be stored in binary tables as columns
+with specific names.  As there is no restriction that the tables only
+contain the columns specified by the standard, we propose to store the
+model of the data in the same tables by adding new columns. The
+additional columns have the prefix \STRING{NS\_} to distinguish them from
+the columns defined by the OIFITS standard. The names of the new
+columns are listed in Table~\ref{tab:model-columns}.  In this way it
+is very easy to compare the actual data and the corresponding model
+values as computed from the reconstructed image and the instrumental
+model assumed by the reconstruction algorithm.  Another advantage of
+this convention is that the same format can be exploited to store the
 values given by model fitting software.
 
 \renewcommand{\ROW}[2]{\texttt{#1} & \texttt{D(\textsl{NWAVE})} & #2 \\}
@@ -378,24 +427,42 @@ the model.  \texttt{\textsl{NWAVE}} is the number of wavelengths.
 \ROWTITLE{New columns in \texttt{OI\_VIS} table}
 Label & Format & Description \\
 \hline
-\ROW{VISAMPMODEL}{Model of the visibility amplitude}
-\ROW{VISPHIMODEL}{Model of the visibility phase in degrees}
+\ROW{NS\_VISAMPMODEL}{Model of the visibility amplitude}
+\ROW{NS\_VISPHIMODEL}{Model of the visibility phase in degrees}
 \hline
 \hline
 \ROWTITLE{New column in \texttt{OI\_VIS2} table}
 Label & Format & Description \\
 \hline
-\ROW{VIS2MODEL}{Model of the squared visibility}
+\ROW{NS\_VIS2MODEL}{Model of the squared visibility}
 \hline
 \hline
 \ROWTITLE{New columns in \texttt{OI\_T3} table}
 Label & Format & Description \\
 \hline
-\ROW{T3AMPMODEL}{Model of the triple-product amplitude}
-\ROW{T3PHIMODEL}{Model of the triple-product phase in degrees}
+\ROW{NS\_T3AMPMODEL}{Model of the triple-product amplitude}
+\ROW{NS\_T3PHIMODEL}{Model of the triple-product phase in degrees}
 \hline
 \end{tabular}
 \end{table}
+
+%==============================================================================
+\section{Command line tools}
+
+It would be useful to provide command line tools for creating and
+editing input files (e.g. to change a parameter), in addition to the
+graphical user interface. Such tools would be useful for scripting
+tests, for example.
+
+Some example command lines are shown below. The first creates a new input
+file named \verb+myinput.fits+ and sets the initial image from the
+primary HDU of \verb+myimage.fits+. The second command changes
+parameter values in an existing file.
+
+\begin{verbatim}
+oi-image create myinput.fits CDELT1=0.25 MAXITER=200 INIT_IMG=myimage.fits
+oi-image edit myinput.fits RGL_ALPH=1e-3 USE_T3A=F
+\end{verbatim}
 
 %==============================================================================
 \appendix
@@ -404,8 +471,9 @@ Label & Format & Description \\
 \begin{description}
 \item[DEC] Declination;
 \item[FITS] Flexible Image Transport System;
-\item[FOC] Field of view;
+\item[FOV] Field of view;
 \item[GUI] Graphical User Interface;
+\item[HDU] Header Data Unit;
 \item[OI-FITS] Optical Interferometric exchange data format;
 \item[RA] Right Ascension;
 \item[WCS] World Coordinate System;
