@@ -175,6 +175,10 @@ reconstruction (for instance, the initial image) and with scalar input
 settings provided as the values of FITS keywords.  This is detailed in
 the following subsections.
 
+Note that the FITS standard states that angular measurements expressed
+as floating-point values and specified with reserved keywords
+\emph{should} be given in degrees.
+
 The HDUs that are specific to the interface specification described in
 this document have \KEYWORD{EXTNAME} values prefixed with
 \STRING{IMAGE-OI}. This is to distinguish them from OIFITS HDUs, which use the
@@ -220,8 +224,12 @@ prefix \STRING{OI\_}.
   \hline
   \ROW{NAXIS1}{integer}{First dimension of the image}
   \ROW{NAXIS2}{integer}{Second dimension of the image}
-  \ROW{CDELT1}{real}{Pixel size along first dimension of the image (in radians)}
-  \ROW{CDELT2}{real}{Pixel size along second dimension of the image (in radians)}
+  \ROW{CTYPE1}{string}{\oops{\STRING{RA} or \STRING{RA---SIN}}}
+  \ROW{CTYPE2}{string}{\oops{\STRING{DEC} or \STRING{DEC--SIN}}}
+  \ROW{CDELT1}{real}{Pixel size along first dimension of the image \oops{(in degrees)}}
+  \ROW{CDELT2}{real}{Pixel size along second dimension of the image \oops{(in degrees)}}
+  \ROW{CUNIT1}{string}{Physical units for CDELT1 (defaults to \STRING{deg} if omitted)}
+  \ROW{CUNIT2}{string}{Physical units for CDELT2 (defaults to \STRING{deg} if omitted)}
   \hline
   \ROWTITLE{Algorithm Results}
   \hline
@@ -314,6 +322,12 @@ specified. \oops{This requires setting the \KEYWORD{CRPIXn},
   \KEYWORD{DC\VARIABLE{i}\_\VARIABLE{j}}, should not be specified as
   their default values (according to FITS standard) are suitable for
   us.}
+
+\oops{fitsverify gives a warning if \KEYWORD{CTYPEi} are
+  omitted. Should these given as \STRING{RA} and \STRING{DEC},
+  meaning linear axes, or as \STRING{RA---SIN} and \STRING{DEC--SIN}
+  which specify the appropriate non-linear transformations between the
+  tangent plane and the celestial sphere?}
 
 \oops{Another issue: for most, if not all, reconstruction software,
   what is relevant is the relative coordinates not the absolute ones.
