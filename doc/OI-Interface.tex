@@ -108,6 +108,12 @@ A few related points have to be considered:
 
   \item  In case of errors, we must adopt some kind of conventions to make
   sure that the GUI can properly account for the errors.
+
+\item It would be helpful for the GUI to incorporate a facility
+  whereby the user can pause the reconstruction, translate the image
+  so that its centre-of-gravity is in the centre of the field, then
+  continue the reconstruction.
+
 \end{enumerate}
 
 %The GUI will be developed at JMMC, presumably in Java as it is mostly portable
@@ -175,6 +181,10 @@ reconstruction (for instance, the initial image) and with scalar input
 settings provided as the values of FITS keywords.  This is detailed in
 the following subsections.
 
+Note that the FITS standard states that angular measurements expressed
+as floating-point values and specified with reserved keywords
+\emph{should} be given in degrees.
+
 The HDUs that are specific to the interface specification described in
 this document have \KEYWORD{EXTNAME} values prefixed with
 \STRING{IMAGE-OI}. This is to distinguish them from OIFITS HDUs, which use the
@@ -191,7 +201,7 @@ prefix \STRING{OI\_}.
 \caption{FITS keywords used to specify the input parameters.  The
   \emph{Image Parameters} are stored in the HDU which contains the
   initial image. This HDU is specified by the value of the
-  \KEYWORD{INIT\_IMG} keyword, which gives its \KEYWORD{EXTNAME}. All
+  \KEYWORD{INIT\_IMG} keyword, which gives its \KEYWORD{HDUNAME}. All
   other parameters are in a binary table HDU with \KEYWORD{EXTNAME} of
   \STRING{IMAGE-OI INPUT PARAM}. \label{tab:input-params}}
 
@@ -218,10 +228,15 @@ prefix \STRING{OI\_}.
   \hline
   \ROWTITLE{Image Parameters}
   \hline
+  \ROW{HDUNAME}{string}{Unique name for the image within the FITS file}
   \ROW{NAXIS1}{integer}{First dimension of the image}
   \ROW{NAXIS2}{integer}{Second dimension of the image}
-  \ROW{CDELT1}{real}{Pixel size along first dimension of the image (in radians)}
-  \ROW{CDELT2}{real}{Pixel size along second dimension of the image (in radians)}
+  \ROW{CTYPE1}{string}{\oops{\STRING{RA} or \STRING{RA---SIN}}}
+  \ROW{CTYPE2}{string}{\oops{\STRING{DEC} or \STRING{DEC--SIN}}}
+  \ROW{CDELT1}{real}{Pixel size along first dimension of the image \oops{(in degrees)}}
+  \ROW{CDELT2}{real}{Pixel size along second dimension of the image \oops{(in degrees)}}
+  \ROW{CUNIT1}{string}{Physical units for CDELT1 (defaults to \STRING{deg} if omitted)}
+  \ROW{CUNIT2}{string}{Physical units for CDELT2 (defaults to \STRING{deg} if omitted)}
   \hline
   \ROWTITLE{Algorithm Results}
   \hline
@@ -315,6 +330,12 @@ specified. \oops{This requires setting the \KEYWORD{CRPIXn},
   their default values (according to FITS standard) are suitable for
   us.}
 
+\oops{fitsverify gives a warning if \KEYWORD{CTYPEi} are
+  omitted. Should these given as \STRING{RA} and \STRING{DEC},
+  meaning linear axes, or as \STRING{RA---SIN} and \STRING{DEC--SIN}
+  which specify the appropriate non-linear transformations between the
+  tangent plane and the celestial sphere?}
+
 \oops{Another issue: for most, if not all, reconstruction software,
   what is relevant is the relative coordinates not the absolute ones.
   We may specify that the reference pixel given by keywords
@@ -349,14 +370,15 @@ the input parameters that it accepts, not just those that were
 provided in the input file. Thus the output file will contain default
 or automatically-chosen values for the remaining parameters.
 
-\oops{Need to define conventions for EXTNAME of all image HDUs}
+\oops{Need to define conventions for EXTNAME and HDUNAME of all image HDUs}
 
 \subsection{Final/current image}
 
-To compare the initial and the final images, they must be stored in different
-HDU, the FITS keyword \KEYWORD{EXTNAME} is used to distinguish them.  As
-explained previously, the dimensions, pixel size and orientation of the output
-image(s) are the same as the initial image.
+To compare the initial and the final images, they must be stored in
+different HDU, the FITS keyword \KEYWORD{HDUNAME} is used to
+distinguish them (the EXTNAME keyword should not be used in the
+primary HDU). As explained previously, the dimensions, pixel size and
+orientation of the output image(s) are the same as the initial image.
 
 %The value of the FITS keyword \KEYWORD{EXTNAME} is \STRING{INITIAL IMAGE} and
 %\STRING{FINAL IMAGE} for the initial and final images respectively.
@@ -369,12 +391,12 @@ output file.  The idea is to have the most relevant image stored in
 the primary HDU.  For the image reconstruction algorithm and for any
 software designed to display or analyze the results, the different
 images are distinguished by their names (given by their
-\KEYWORD{EXTNAME} keyword).  \oops{OK but the last image should have a
+\KEYWORD{HDUNAME} keyword).  \oops{OK but the last image should have a
   specific name, perhaps set \KEYWORD{LAST\_IMG} keyword in the
-  primary HDU with name of the final image and let all reconstructed
+  input parameters HDU with name of the final image and let all reconstructed
   images be called:
 \begin{quote}
-\KEYWORD{EXTNAME = 'OUTPUT\VARIABLE{n}'}
+\KEYWORD{HDUNAME = 'OUTPUT\VARIABLE{n}'}
 \end{quote}
 with \VARIABLE{n} the iteration number.}
 
@@ -383,14 +405,15 @@ the image reconstruction algorithm may be started with the final image
 instead of the initial one.  To that end, there must be some means to
 specify the starting image for the reconstruction.  This is the
 purpose of the \KEYWORD{INIT\_IMG} keyword (see
-Table~\ref{tab:input-params}) in the primary HDU which indicates the
-name of the initial image.
+Table~\ref{tab:input-params}) in the input parameters HDU which
+indicates the HDUNAME of the initial image. This HDUNAME must be
+unique within the file.
 
 \subsubsection{Output parameters}
 
 Any scalar output parameters from the image reconstruction shall be
 stored in a binary table HDU with \KEYWORD{EXTNAME} of
-\STRING{OI-IMAGE OUTPUT PARAM}. Examples of scalar outputs include
+\STRING{IMAGE-OI OUTPUT PARAM}. Examples of scalar outputs include
 $\chi^2$, any regularization parameters estimated from the data, and
 any model parameters that are not image pixels (for example stellar
 disk parameters in SPARCO).
