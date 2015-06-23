@@ -4,4 +4,6 @@ Design and specification of an interface to image reconstruction and model fitti
 
 # Contents
 
-* [`doc`](./doc) contains various documents
+* [*Unified Image Reconstruction Description*](./doc/unified_desc/unified_desc.pdf) exploits the *inverse problem* framework to present the general principles of image reconstruction from interferometric data.
+* [*Interface to Image Reconstruction*](./doc/interface/OI-Interface.pdf) is a draft document which the specifactions for a graphical user interface to control image reconstruction algorithms. 
+* Directory [`doc`](./doc) contains the sources of the various documents.
