@@ -428,7 +428,7 @@ optical interferometric data be stored in binary tables as columns
 with specific names.  As there is no restriction that the tables only
 contain the columns specified by the standard, we propose to store the
 model of the data in the same tables by adding new columns. The
-additional columns have the prefix \STRING{NS\_} to distinguish them from
+additional columns have the prefix \STRING{NS\_MODEL\_} to distinguish them from
 the columns defined by the OIFITS standard. The names of the new
 columns are listed in Table~\ref{tab:model-columns}.  In this way it
 is very easy to compare the actual data and the corresponding model
@@ -450,21 +450,26 @@ the model.  \texttt{\textsl{NWAVE}} is the number of wavelengths.
 \ROWTITLE{New columns in \texttt{OI\_VIS} table}
 Label & Format & Description \\
 \hline
-\ROW{NS\_VISAMPMODEL}{Model of the visibility amplitude}
-\ROW{NS\_VISPHIMODEL}{Model of the visibility phase in degrees}
+\ROW{NS\_MODEL\_VISAMP}{Model of the visibility amplitude}
+\ROW{NS\_MODEL\_VISAMPERR}{Model of the error in visibility amplitude}
+\ROW{NS\_MODEL\_VISPHI}{Model of the visibility phase in degrees}
+\ROW{NS\_MODEL\_VISPHIERR}{Model of the error in visibility phase in degrees}
 \hline
 \hline
 \ROWTITLE{New column in \texttt{OI\_VIS2} table}
 Label & Format & Description \\
 \hline
-\ROW{NS\_VIS2MODEL}{Model of the squared visibility}
+\ROW{NS\_MODEL\_VIS2}{Model of the squared visibility}
+\ROW{NS\_MODEL\_VIS2ERR}{Model of the error in squared visibility}
 \hline
 \hline
 \ROWTITLE{New columns in \texttt{OI\_T3} table}
 Label & Format & Description \\
 \hline
-\ROW{NS\_T3AMPMODEL}{Model of the triple-product amplitude}
-\ROW{NS\_T3PHIMODEL}{Model of the triple-product phase in degrees}
+\ROW{NS\_MODEL\_T3AMP}{Model of the triple-product amplitude}
+\ROW{NS\_MODEL\_T3AMPERR}{Model of the error in triple-product amplitude}
+\ROW{NS\_MODEL\_T3PHI}{Model of the triple-product phase in degrees}
+\ROW{NS\_MODEL\_T3PHIERR}{Model of the error in triple-product phase in degrees}
 \hline
 \end{tabular}
 \end{table}
