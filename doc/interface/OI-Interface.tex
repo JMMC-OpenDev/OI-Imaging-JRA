@@ -198,18 +198,20 @@ prefix \STRING{OI\_}.
   Keyword & Type & Description \\}
 
 \begin{table}
-\caption{FITS keywords used to specify the input parameters.  The
-  \emph{Image Parameters} are stored in the HDU which contains the
-  initial image. This HDU is specified by the value of the
-  \KEYWORD{INIT\_IMG} keyword, which gives its \KEYWORD{HDUNAME}. All
-  other parameters are in a binary table HDU with \KEYWORD{EXTNAME} of
-  \STRING{IMAGE-OI INPUT PARAM}. \label{tab:input-params}}
+  \caption{FITS keywords used to specify the input parameters.  The
+    \emph{Image Parameters} are stored in the HDU which contains the
+    initial image. This HDU is specified by the value of the
+    \KEYWORD{INIT\_IMG} keyword, which gives its
+    \KEYWORD{HDUNAME}. All other parameters \oops{(except
+      \KEYWORD{LAST\_IMG})} are in a binary table HDU with
+    \KEYWORD{EXTNAME} of \STRING{IMAGE-OI INPUT
+      PARAM}. \label{tab:input-params}}
 
 \begin{tabular}{lcl}
   \hline
   \ROWTITLE{Data Selection}
   \hline
-  \ROW{TARGET}{\oops{string}}{Identifier of the target object to reconstruct}
+  \ROW{TARGET}{string}{Identifier of the target object to reconstruct}
   \ROW{WAVE\_MIN}{real}{Minimum wavelength to select (in meters)}
   \ROW{WAVE\_MAX}{real}{Maximum wavelength to select (in meters)}
   \ROW{USE\_VIS}{logical}{Use complex visibility data if any}
@@ -221,6 +223,7 @@ prefix \STRING{OI\_}.
   \ROW{INIT\_IMG}{string}{Identifier of the initial image}
   \ROW{MAXITER}{integer}{Maximum number of iterations to run}
   \ROW{RGL\_NAME}{string}{Name of the regularization method}
+  \ROW{AUTO\_WGT}{logical}{Automatic regularization weight}
   \ROW{RGL\_WGT}{real}{Weight of the regularization}
   \ROW{RGL\_ALPH}{real}{Parameter $\alpha$ of the regularization}
   \ROW{RGL\_BETA}{real}{Parameter $\beta$ of the regularization}
@@ -240,7 +243,7 @@ prefix \STRING{OI\_}.
   \hline
   \ROWTITLE{Algorithm Results}
   \hline
-  \ROW{LAST\_IMG}{string}{Identifier of the final image}
+  \ROW{LAST\_IMG}{string}{Identifier of the final image \oops{(in \STRING{IMAGE-OI OUTPUT PARAM})}}
   \hline
 \end{tabular}
 \end{table}
@@ -265,14 +268,14 @@ To keep things simple, any sophisticated selection, merging or editing
 of the data should be done by a separate tool.  The image
 reconstruction software applications shall assume that they receive
 clean input data.  There are however a few parameters devoted to the
-selection of data.  The \KEYWORD{TARGET} keyword is set with the
-identifier of the target object to reconstruct.  The value of this
-keyword should match one of the identifiers in the column
-\KEYWORD{TARGET\_ID} in the OI\_TARGET binary table of the OI-FITS
-file.  In order to restrict the types of interferometric data used for
-the reconstruction, keywords \KEYWORD{USE\_VIS}, \KEYWORD{USE\_VIS2}
-and \KEYWORD{USE\_T3} should be set with logical values specifying
-whether to use the complex visibility, the squared visibility, and the
+selection of data.  The \KEYWORD{TARGET} keyword specifies the name of
+the target object to reconstruct.  The value of this keyword should
+match one of the identifiers in the column \KEYWORD{TARGET} in the
+\texttt{OI\_TARGET} binary table of the OIFITS file.  In order to
+restrict the types of interferometric data used for the
+reconstruction, keywords \KEYWORD{USE\_VIS}, \KEYWORD{USE\_VIS2} and
+\KEYWORD{USE\_T3} should be set with logical values specifying whether
+to use the complex visibility, the squared visibility, and the
 triple-product data if any.  Not all algorithms can use all types of
 data and the values of these keywords should be set (in the output
 file) so as to reflect what was really used.
@@ -280,9 +283,6 @@ file) so as to reflect what was really used.
 \oops{Shall we have \KEYWORD{USE\_VISA}/\KEYWORD{USE\_VISP} to distinguish
   amplitude/phase data? And likely, \KEYWORD{USE\_T3A}/\KEYWORD{USE\_T3P}
   for the triple-product data?}
-
-\oops{Does \KEYWORD{TARGET} specify the integer \KEYWORD{TARGET\_ID}
-  or the target name string?}
 
 Wavelength selection is discussed in the next section.
 
@@ -297,7 +297,7 @@ The primary objective is to consider monochromatic image reconstruction.  The
 interferometric data are generally available at many wavelengths.  The result
 will, in fact, be a gray image of the target built from the data in the
 wavelength range (inclusive) specified by the FITS keywords \KEYWORD{WAVE\_MIN}
-and \KEYWORD{WAVE\_MAX}.  \oops{The wavelength range is given in meters.}
+and \KEYWORD{WAVE\_MAX}. The wavelength range is given in meters.
 
 
 \subsection{Initial image}
@@ -393,8 +393,8 @@ software designed to display or analyze the results, the different
 images are distinguished by their names (given by their
 \KEYWORD{HDUNAME} keyword).  \oops{OK but the last image should have a
   specific name, perhaps set \KEYWORD{LAST\_IMG} keyword in the
-  input parameters HDU with name of the final image and let all reconstructed
-  images be called:
+  \emph{output} parameters HDU with name of the final image and let
+  all reconstructed images be called:
 \begin{quote}
 \KEYWORD{HDUNAME = 'OUTPUT\VARIABLE{n}'}
 \end{quote}
@@ -451,25 +451,25 @@ the model.  \texttt{\textsl{NWAVE}} is the number of wavelengths.
 Label & Format & Description \\
 \hline
 \ROW{NS\_MODEL\_VISAMP}{Model of the visibility amplitude}
-\ROW{NS\_MODEL\_VISAMPERR}{Model of the error in visibility amplitude}
+\ROW{NS\_MODEL\_VISAMPERR}{Model of the error in visibility amplitude \oops{(optional)}}
 \ROW{NS\_MODEL\_VISPHI}{Model of the visibility phase in degrees}
-\ROW{NS\_MODEL\_VISPHIERR}{Model of the error in visibility phase in degrees}
+\ROW{NS\_MODEL\_VISPHIERR}{Model of the error in visibility phase in degrees \oops{(optional)}}
 \hline
 \hline
 \ROWTITLE{New column in \texttt{OI\_VIS2} table}
 Label & Format & Description \\
 \hline
 \ROW{NS\_MODEL\_VIS2}{Model of the squared visibility}
-\ROW{NS\_MODEL\_VIS2ERR}{Model of the error in squared visibility}
+\ROW{NS\_MODEL\_VIS2ERR}{Model of the error in squared visibility \oops{(optional)}}
 \hline
 \hline
 \ROWTITLE{New columns in \texttt{OI\_T3} table}
 Label & Format & Description \\
 \hline
 \ROW{NS\_MODEL\_T3AMP}{Model of the triple-product amplitude}
-\ROW{NS\_MODEL\_T3AMPERR}{Model of the error in triple-product amplitude}
+\ROW{NS\_MODEL\_T3AMPERR}{Model of the error in triple-product amplitude \oops{(optional)}}
 \ROW{NS\_MODEL\_T3PHI}{Model of the triple-product phase in degrees}
-\ROW{NS\_MODEL\_T3PHIERR}{Model of the error in triple-product phase in degrees}
+\ROW{NS\_MODEL\_T3PHIERR}{Model of the error in triple-product phase in degrees \oops{(optional)}}
 \hline
 \end{tabular}
 \end{table}
