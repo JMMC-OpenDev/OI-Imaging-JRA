@@ -1,3 +1,4 @@
+% !TeX spellcheck = en_US
 \documentclass{article}
 \usepackage[affil-it]{authblk}
 
@@ -284,11 +285,13 @@ file) so as to reflect what was really used.
   amplitude/phase data? And likely, \KEYWORD{USE\_T3A}/\KEYWORD{USE\_T3P}
   for the triple-product data?}
 
+Whatever these settings, the image reconstruction software have to
+honor the \KEYWORD{FLAG} column of the OI data.  We recall that this
+field has a logical value which is true when the corresponding piece
+of data should be discarded and false when it should be considered.
+
 Wavelength selection is discussed in the next section.
 
-\oops{Open question: do the image reconstruction software have to honor the
-  \KEYWORD{FLAG} column of the OI data?  Personnaly (Éric) I think that the
-  answer is yes.  Then the meaning of this flag should be recalled.}
 
 
 \subsection{Wavelength range}
@@ -314,21 +317,76 @@ dimensions are given by the FITS keywords \KEYWORD{NAXIS1} and
 
 It is not intended that the image reconstruction algorithm be able to
 deal with any possible world coordinate system (WCS) nor with any
-possible coordinate units.  The images are therefore stored according
-to a given WCS with given units.  First image axis corresponds to the
-right ascension (RA) and second image axis corresponds to the
-declination (DEC).  \oops{Specify the units, the orientation and the
-  ordering of pixels?}  The same conventions (WCS, units and
-orientation) hold for any output image produced by the reconstruction
-algorithm.  For any external software to correctly display the images,
-the parameters of the WCS must be completely and correctly
-specified. \oops{This requires setting the \KEYWORD{CRPIXn},
-  \KEYWORD{CRVALn}, \KEYWORD{CTYPEn}, and \KEYWORD{CUNITn} keywords.
-  Other WCS keywords like \KEYWORD{CROTAn},
-  \KEYWORD{PC\VARIABLE{i}\_\VARIABLE{j}},
-  \KEYWORD{DC\VARIABLE{i}\_\VARIABLE{j}}, should not be specified as
-  their default values (according to FITS standard) are suitable for
-  us.}
+possible coordinate units.  We therefore restrict to WCS which can be
+fully specified with \KEYWORD{CRPIX\VARIABLE{i}},
+\KEYWORD{CRVAL\VARIABLE{i}}, \KEYWORD{CDELT\VARIABLE{i}},
+\KEYWORD{CTYPE\VARIABLE{i}}, and \KEYWORD{CUNIT\VARIABLE{i}} keywords
+(where \VARIABLE{i} is the axis number). Other WCS keywords like
+\KEYWORD{CROTAn}, \KEYWORD{PC\VARIABLE{i}\_\VARIABLE{j}},
+\KEYWORD{DC\VARIABLE{i}\_\VARIABLE{j}}, should not be specified as
+their default values (according to FITS standard) are suitable for us.
+The same WCS conventions hold for any output image produced by the
+reconstruction algorithm.  For any external software to correctly
+display the images, the parameters of the WCS must be completely and
+correctly specified.
+
+The conventions are that the first image axis corresponds to the right
+ascension (RA) and second image axis corresponds to the declination
+(DEC) both relative to the center of the field of view (FOV) specified
+by the keywords \KEYWORD{CRPIX\VARIABLE{i}} (in fractional pixel
+units). If keywords \KEYWORD{CRPIX\VARIABLE{i}} are omitted, they
+default to the geometric center of the FOV. The pixel size (which is
+specified by the absolute values of \KEYWORD{CDELT1} and
+\KEYWORD{CDELT2}) must be the same in both direction.  Following
+standard conventions to display an image, to have the relative right
+ascension (RA) oriented toward East to correspond to the left (first
+columns) of the image, \KEYWORD{CDELT1} should be strictly negative,
+while, to have the relative declination (DEC) oriented toward North to
+correspond to the top (last rows) of the image,  \KEYWORD{CDELT2}
+should be strictly positive. By default, the physical coordinate units
+are in degrees; otherwise \KEYWORD{CUNIT\VARIABLE{i}} can be
+\verb+'deg'+ for degrees or \verb+'arsec'+ for arcseconds.
+Table~\ref{tab:wcs} summarizes these rules.
+
+The OI-FITS norm specifies that \KEYWORD{RAEP0} and \KEYWORD{DECEP0}
+in \KEYWORD{OI\_TARGET} are the coordinates of the phase center, which
+we assume to be the absolute (not relative) world coordinates of the
+reference pixel in the reconstructed image.  \oops{With these
+conventions, the relative world coordinates of the FOV center
+(specified by keywords \KEYWORD{CRVAL\VARIABLE{i}}) should be
+$(0,0)$.}
+
+
+\begin{table}
+ \centering
+  \caption{FITS keywords used to specify the Wold Coordinate System(WCS).
+    All these keywords refer to a given axis denoted as \VARIABLE{i}.}
+    \label{tab:wcs}
+    
+    \medskip
+    
+  \begin{tabular}{lll}
+  \hline
+  Keyword & Description & Default \\
+  \hline
+  \hline
+  \KEYWORD{CRPIX\VARIABLE{i}} & Index index of the reference pixel &
+  Geometric center \\
+   & (start at 1 and can be fractional) \\
+  \hline
+  \KEYWORD{CRVAL\VARIABLE{i}} & Physical coordinate of ref. pixel & 0.0 \\
+  \hline
+  \KEYWORD{CDELT\VARIABLE{i}} & Physical coordinate increment & \\
+  \hline
+  \KEYWORD{CTYPE\VARIABLE{i}} & Coordinate name
+  & \KEYWORD{'RA---TAN'} for 1st axis,\\
+  && \KEYWORD{'DEC--TAN'} for 2nd axis \\
+  \hline
+  \KEYWORD{CUNIT\VARIABLE{i}} & Units of the physical coordinates&
+  Degree \\
+  \hline
+  \end{tabular}
+\end{table}
 
 \oops{fitsverify gives a warning if \KEYWORD{CTYPEi} are
   omitted. Should these given as \STRING{RA} and \STRING{DEC},
