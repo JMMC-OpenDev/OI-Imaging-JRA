@@ -199,6 +199,8 @@ prefix \STRING{OI\_}.
   Keyword & Type & Description \\}
 
 \begin{table}
+  \centering
+  
   \caption{FITS keywords used to specify the input parameters.  The
     \emph{Image Parameters} are stored in the HDU which contains the
     initial image. This HDU is specified by the value of the
@@ -208,7 +210,9 @@ prefix \STRING{OI\_}.
     \KEYWORD{EXTNAME} of \STRING{IMAGE-OI INPUT
       PARAM}. \label{tab:input-params}}
 
-\begin{tabular}{lcl}
+\medskip
+
+\begin{tabular}{lcp{83mm}}
   \hline
   \ROWTITLE{Data Selection}
   \hline
@@ -235,12 +239,18 @@ prefix \STRING{OI\_}.
   \ROW{HDUNAME}{string}{Unique name for the image within the FITS file}
   \ROW{NAXIS1}{integer}{First dimension of the image}
   \ROW{NAXIS2}{integer}{Second dimension of the image}
-  \ROW{CTYPE1}{string}{\oops{\STRING{RA} or \STRING{RA---SIN}}}
-  \ROW{CTYPE2}{string}{\oops{\STRING{DEC} or \STRING{DEC--SIN}}}
-  \ROW{CDELT1}{real}{Pixel size along first dimension of the image \oops{(in degrees)}}
-  \ROW{CDELT2}{real}{Pixel size along second dimension of the image \oops{(in degrees)}}
-  \ROW{CUNIT1}{string}{Physical units for CDELT1 (defaults to \STRING{deg} if omitted)}
-  \ROW{CUNIT2}{string}{Physical units for CDELT2 (defaults to \STRING{deg} if omitted)}
+  \ROW{CTYPE1}{string}{\STRING{RA---TAN}}
+  \ROW{CTYPE2}{string}{\STRING{DEC--TAN}}
+  \ROW{CDELT{\slshape i}}{real}{Pixel increment along \texttt{\slshape i}-th
+    dimension of the image (for \texttt{\slshape i} = 1 or 2)}
+  \ROW{CUNIT{\slshape i}}{string}{Physical units for \KEYWORD{CDELT{\slshape i}}
+    and \KEYWORD{CRVAL{\slshape i}}; defaults to \STRING{deg} if omitted}
+  \ROW{CRPIX{\slshape i}}{real}{Index of reference pixel along \texttt{\slshape i}-th
+    dimension (for \texttt{\slshape i} = 1 or 2); defaults to the geometric center
+    of the field of view if omitted}
+  \ROW{CRVAL{\slshape i}}{real}{Physical coordinate of reference pixel along
+    \texttt{\slshape i}-th dimension (for \texttt{\slshape i} = 1 or 2) and
+    relative to the center of the field of view; defaults to 0 if omitted}
   \hline
   \ROWTITLE{Algorithm Results}
   \hline
@@ -379,8 +389,8 @@ $(0,0)$.}
   \KEYWORD{CDELT\VARIABLE{i}} & Physical coordinate increment & \\
   \hline
   \KEYWORD{CTYPE\VARIABLE{i}} & Coordinate name
-  & \KEYWORD{'RA---TAN'} for 1st axis,\\
-  && \KEYWORD{'DEC--TAN'} for 2nd axis \\
+  & \STRING{RA---TAN} for 1st axis,\\
+  && \STRING{DEC--TAN} for 2nd axis \\
   \hline
   \KEYWORD{CUNIT\VARIABLE{i}} & Units of the physical coordinates&
   Degree \\
@@ -388,23 +398,13 @@ $(0,0)$.}
   \end{tabular}
 \end{table}
 
-\oops{fitsverify gives a warning if \KEYWORD{CTYPEi} are
-  omitted. Should these given as \STRING{RA} and \STRING{DEC},
-  meaning linear axes, or as \STRING{RA---SIN} and \STRING{DEC--SIN}
-  which specify the appropriate non-linear transformations between the
-  tangent plane and the celestial sphere?}
-
-\oops{Another issue: for most, if not all, reconstruction software,
-  what is relevant is the relative coordinates not the absolute ones.
-  We may specify that the reference pixel given by keywords
-  \KEYWORD{CRPIX\VARIABLE{i}} (in pixel units) be the center of the
-  field of view (FOV) and that, by default, this is the geometrical
-  center of the FOV.  Then the pixel size is given by the keywords
-  \KEYWORD{CDELT\VARIABLE{i}} which must have the same absolute value
-  (the sign can be used to cope with the orientation, \emph{explain
-    how}).  The keywords \KEYWORD{CRVAL\VARIABLE{i}} can, optionally,
-  be specified to indicate the absolute coordinates of the center of
-  the FOV and to convert relative coordinates to absolute ones.}
+\oops{\texttt{fitsverify} gives a warning if \KEYWORD{CTYPE\slshape i} are
+omitted. Should these given as \STRING{RA} and \STRING{DEC}, meaning linear
+axes, or as \STRING{RA---SIN} and \STRING{DEC--SIN}, or as \STRING{RA---TAN}
+and \STRING{DEC--TAN} which specify the appropriate non-linear transformations
+between the tangent plane and the celestial sphere? Eric: In the document, I
+have assumed that \STRING{RA---TAN} and \STRING{DEC--TAN} are the correct ones;
+can we check whether this is true?}
 
 %==============================================================================
 \section{Output format}
