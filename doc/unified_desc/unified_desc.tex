@@ -1,3 +1,4 @@
+% !TeX spellcheck = en_GB
 \documentclass{article}
 
 %------------------------------------------------------------------- PACKAGES -
@@ -8,20 +9,32 @@
 \usepackage{natbib}
 \bibpunct{(}{)}{;}{a}{}{,} % to follow the A&A style
 
+\usepackage[dvipsnames,hyperref,table]{xcolor}
 \usepackage{hyperref}
-% \hypersetup{
-%   breaklinks=true,
-%   colorlinks=true,
-%   linkcolor=myLinkColor,
+\hypersetup{
+   breaklinks=true,
+   colorlinks=true,
+   linkcolor=RoyalBlue,
 %   %anchorcolor=black,
-%   citecolor=myLinkColor,
-%   filecolor=myLinkColor,
-%   menucolor=myLinkColor,
-%   pagecolor=myLinkColor,
-%   urlcolor=myLinkColor,
+   citecolor=RoyalBlue,
+   filecolor=RoyalBlue,
+   menucolor=RoyalBlue,
+   pagecolor=RoyalBlue,
+   urlcolor=RoyalBlue,
 %   %backref=true,
 %   %hyperindex=true
-% }
+}
+
+% Table settings:
+\usepackage{array}
+\usepackage{booktabs}
+\colorlet{tableheadcolor}{gray!25}
+\colorlet{tablerowcolor}{gray!12.5}
+\newcommand{\TopRule}{\specialrule{\heavyrulewidth}{0pt}{0pt}}
+\newcommand{\BottomRule}{\specialrule{\lightrulewidth}{0pt}{0pt}}
+\extrarowheight2pt
+\newcolumntype{P}[1]{>{\raggedright}p{#1}}
+\newcolumntype{M}[1]{>{\raggedright}m{#1}}
 
 \newcommand{\vocab}[1]{\textbf{#1}}
 
@@ -417,8 +430,8 @@
 %   Sup\'{e}rieure de Lyon; thiebaut (at) obs.univ-lyon1.fr}}
 
 \identifier{Opticon WP4 Deliverable 4.1}
-\revision{0.1}
-\date{\today}
+\revision{0.2}
+\date{January 3, 2017}
 
 \opttitlepage
 
@@ -435,7 +448,7 @@
   framework is then used to describe the algorithms specifically developed for
   optical interferometry. Other topics of interest to users of these
   algorithms are also covered, including general descriptions of the inputs,
-  outputs and user interactions needed for succesful image reconstruction.
+  outputs and user interactions needed for successful image reconstruction.
 \end{abstract}
 
 \section{Introduction}
@@ -496,10 +509,10 @@ common usage, the highlighted one is preferred for the JRA outputs.
 \section{Interferometric Data}
 \label{sec:interferometric-data}
 
-The instantaneous output of an optical interferometer is the so-called
-\vocab{complex visibility} $\ComplexVis_{j_1,j_2}(t)$ of the interference
-fringes between the $j_1$-th and the $j_2$-th telescopes at instant
-$t$~\citep{Monnier-2003-interferometry}:
+The instantaneous and monochromatic output of an optical interferometer is the
+so-called \vocab{complex visibility} $\ComplexVis_{j_1,j_2}(t)$ of the
+interference fringes between the $j_1$-th and the $j_2$-th telescopes at
+instant $t$~\citep{Monnier-2003-interferometry}:
 \begin{equation}
   \label{eq:instantaneous-complex-visibility}
   \ComplexVis_{j_1,j_2}(t) = \Gain_{j_1}(t)^{\star} \, \Gain_{j_2}(t) \,
@@ -629,7 +642,8 @@ errors and can be estimated by simultaneous photometric calibration and, to
 compensate for residual effects, from the power spectrum of a reference source
 (a so-called \emph{calibrator}) observed shortly before and/or afterwards.
 Hence measuring $\Powerspectrum_{j_1,j_2,m}$ gives the object power spectrum
-$\abs{\FT{\Image}(\VFreq_{j_1,j_2,m})}^2$.
+$\abs{\FT{\Image}(\VFreq_{j_1,j_2,m})}^2$ but carries no Fourier phase
+information.
 
 To obtain Fourier phase information, the \vocab{bispectrum} of the complex
 visibilities is measured:
@@ -686,7 +700,7 @@ available as input data for image reconstruction, thus:
   \Bispectrum_{j_1,j_2,j_3,m}^\DataTag
   &= \FT{\Image}(\VFreq_{j_1,j_2,m}) \,
      \FT{\Image}(\VFreq_{j_2,j_3,m}) \,
-     \FT{\Image}(\VFreq_{j_3,j_1,m}) \notag
+     \FT{\Image}(\VFreq_{j_3,j_1,m})
      + \Bispectrum_{j_1,j_2,j_3,m}^\ErrorTag
   \label{eq:bispectrum-data}
 \end{align}
@@ -731,8 +745,8 @@ Sec.~\ref{sec:optical-interferometry}.
 To simplify the notation, we introduce the \emph{data vector}
 $\Data\in\Complexes^L$ which collates all the complex visibility measurements:
 $\Data[\ell]=\ComplexVis_{j_1,j_2,m}^\DataTag$ with $\ell\sim(j_1,j_2,m)$ to
-denote a one-to-one mapping between index $\ell$ and triplet $(j_1,j_2,m)$.
-Long baseline interferometers provide data for a limited set
+denote a one-to-one mapping between index $\ell$ and triplet $(j_1,j_2,m)$ for
+measured data. Long baseline interferometers provide data for a limited set
 $\FreqSet=\{\VFreq_k\}_{k=1,\ldots,K}$ of observed spatial frequencies,
 corresponding to the projected baselines at the times of the observations.
 
@@ -769,7 +783,8 @@ distribution.  A very general description is given by a linear expansion:
 \end{equation}
 where $\{\BasisFunc_n(\VDirn)\}_{n=1,\ldots,N}$ are basis functions and
 $\VParam\in\Reals^N$ are the image parameters, for instance, the values of the
-image \emph{pixels}, or wavelet coefficients.
+image \emph{pixels}, or wavelet coefficients.  In what follows, we will assume
+that $\V\Param$ are the image values on an evenly spaced grid of pixels.
 
 % The function $\BasisFunc(\VDirn)$ can also be used as a \emph{building-block}
 % for image reconstruction \citep{Hofmann_Weigelt-1993-building_blocks}.
@@ -817,7 +832,9 @@ operator, $\InterpOp\in\Complexes^{K\times{}N}$ is a linear operator to
 interpolate the discrete Fourier transform of the image
 $\FT{\VParam}=\DFTop\cdot\VParam$ at the observed spatial frequencies and
 $\ApodizationOp$ is diagonal and compensates the field of view apodization (or
-spectral smoothing) caused by $\InterpOp$.
+spectral smoothing) caused by $\InterpOp$.  Note that $\ApodizationOp$ may
+also perform zero-padding of the image to reduce the frequel size and thus
+improve the precision.
 
 % In radio astronomy a different technique called \emph{regridding}
 % \citep{Thompson_Bracewell-1974-Fourier_interpolation,1989ASPC....6..117X} is
@@ -856,18 +873,18 @@ $\OTFop\in\Complexes^{L\times{}K}$ the OTF operator given by:
 Here $\BaseSet_k$ is the set of telescope pairs and exposures yielding
 spatial frequency $\VFreq_k$.
 
-Applying the pseudo-inverse $\XForm^{+} =
-\ApodizationOp^{-1}\cdot\DFTop^{-1}\cdot\InterpOp^{+}$ of $\XForm$ to the data
+Applying the pseudo-inverse $\XForm^{\dagger} =
+\ApodizationOp^{-1}\cdot\DFTop^{-1}\cdot\InterpOp^{\dagger}$ of $\XForm$ to the data
 yields the so-called \emph{dirty image} (see \Fig{fig:dirty-map}):
 \begin{equation}
   \label{eq:dirty-map}
-  \mathring{\Data} = \XForm^{+}\cdot\Data = \M{H}\cdot\VParam
+  \mathring{\Data} = \XForm^{\dagger}\cdot\Data = \M{H}\cdot\VParam
   + \mathring{\Error}
   %VParam_\Tag{dirty} = [\M{M}\T\cdot\Werror\cdot\M{M}]^{\dagger}
   %\cdot\M{M}\T\cdot\Werror\cdot\Data
 \end{equation}
-where $\mathring{\Error}=\XForm^{+}\cdot\Error$ and
-$\M{H}=\XForm^{+}\cdot\OTFop\cdot\XForm$. Neglecting the apodization, $\M{H}$
+where $\mathring{\Error}=\XForm^{\dagger}\cdot\Error$ and
+$\M{H}=\XForm^{\dagger}\cdot\OTFop\cdot\XForm$. Neglecting the apodization, $\M{H}$
 essentially performs the convolution of the image by the \vocab{dirty beam}
 (see \Fig{fig:dirty-map}).  From \Eq{eq:Fourier-plane-data-model} and
 \Eq{eq:dirty-map}, image reconstruction from interferometric data can be seen
@@ -924,14 +941,15 @@ brightness distribution must be positive and normalized, the feasible set is:
 \begin{equation}
   \label{eq:feasible-set}
   \FeasibleSet =
-  \{\VParam\in\Reals^N; \V{\Param} \ge 0, \sum_n \Param_n = 1\}
+  \Bigl\{\VParam\in\Reals^N \:\Bigm\vert\: \V{\Param} \ge 0, \quad
+   \sum\nolimits_n \Param_n = 1\Bigl\}
 \end{equation}
 where $\V{\Param} \ge 0$ means: $\forall n$, $\Param_n \ge 0$.  Rather than
 enforce precise agreement with the data, we can instead measure the distance
 of the model to the data by a penalty function $\Fdata(\VParam)$ and replace
 the equality constraint in \Eq{eq:strict-data} with $\Fdata(\V{x}) \le
-\DataLevel$. Here $\DataLevel$ is set according to the level of errors, in
-order to avoid over-fitting the data:
+\DataLevel$. Here $\DataLevel$ is set according to the expected level of
+errors, in order to avoid over-fitting the data:
 \begin{equation}
   \label{eq:min-prior-st-data-const}
   \VParam^{+} = \argmin_{\VParam\in\FeasibleSet} \Fprior(\VParam)
@@ -946,11 +964,11 @@ The Lagrangian of this constrained optimization problem can be written as:
 where $\ell$ is the Lagrange multiplier associated with the inequality
 constraint $\Fdata(\VParam)\le\DataLevel$.  If the constraint is
 \emph{active}\footnote{Conversely, the constraint being \emph{inactive} would
-  imply that $\ell=0$, which would mean that the data are useless, which is
-  hopefully not the case...}, then $\ell>0$ and $\Fdata(\VParam)=\DataLevel$
-\citep{Nocedal_Wright-2006-numerical_optimization}.  Dropping the constant
-$\DataLevel$ which does not depend on $\VParam$, the solution is obtained by
-solving either of the following problems:
+imply that $\ell=0$, which would mean that the data are useless, which is
+hopefully not the case...}, then $\ell>0$ and $\Fdata(\VParam)=\DataLevel$ at
+the solution $\VParam^{+}$ \citep{Nocedal_Wright-2006-numerical_optimization}.
+ Dropping the constant $\DataLevel$ which does not depend on $\VParam$, the
+solution is obtained by solving either of the following problems:
 \begin{align}
   \VParam^{+}
   &= \argmin_{\VParam\in\FeasibleSet}
@@ -978,14 +996,14 @@ be below a preset level:
 \end{equation}
 For convex penalties and providing that the Lagrange multipliers ($\mu$ and
 $\ell$) and the thresholds ($\DataLevel$ and $\PriorLevel$) are set
-consistently, image restoration is achieved by solving either of the
-problems in \Eq{eq:min-prior-st-data-const}, \Eq{eq:min-data-st-prior-const}
-or by minimizing the penalty function in \Eq{eq:cost-function}.  However,
-choosing which of these particular problems to solve can be a deciding issue
-for the efficiency of the method.  For instance, if $\Fdata(\VParam)$ and
-$\Fprior(\VParam)$ are both \emph{smooth functions}, direct minimization of
-$\Fcost(\VParam; \mu)$ in \Eq{eq:cost-function} can be done by using general
-purpose optimization algorithms
+consistently, image restoration is achieved by solving either of the problems
+in \Eq{eq:min-prior-st-data-const}, \Eq{eq:min-data-st-prior-const} or by
+minimizing the penalty function in \Eq{eq:cost-function}.  However, choosing
+which of these particular problems to solve can be a deciding issue for the
+efficiency of the method in terms of computational time.  For instance, if
+$\Fdata(\VParam)$ and $\Fprior(\VParam)$ are both \emph{smooth functions},
+direct minimization of $\Fcost(\VParam; \mu)$ in \Eq{eq:cost-function} can be
+done by using general purpose optimization algorithms
 \citep{Nocedal_Wright-2006-numerical_optimization}.
 
 %==============================================================================
@@ -1078,7 +1096,7 @@ entropy (MEM) has perhaps the longest history. MEM methods are based on the
 1950s work of Jaynes on information theory; the underlying idea is to obtain
 the least informative image which is consistent with the
 data~\citep{Ables-1974-MEM}.  This amounts to minimizing a criterion like the
-one in \Eq{eq:cost-function} with $\Fprior(\VParam) = -S(\VParam)$ where the
+one in \Eq{eq:cost-function} with $\mu\,\Fprior(\VParam) = -S(\VParam)$ where the
 \vocab{entropy} $S(\VParam)$ measures the informational content of the image
 $\VParam$.  In this framework, $\Fprior(\VParam)$ is sometimes called
 \vocab{negentropy}.  Among all the expressions considered for the negentropy of
@@ -1130,12 +1148,12 @@ with $\Cprior$ the prior covariance and $\bar{\VParam}$ the prior solution.
 One simple but effective example is the \emph{compactness} penalty:
 \begin{equation}
   \label{eq:fov-penalty}
-  \Fprior(\VParam) = \sum_{n} w^\PriorTag_n\,\Param_n^2 \, ,  
+  \Fprior(\VParam) = \sum\nolimits_{n} w^\PriorTag_n\,\Param_n^2 \, ,  
 \end{equation}
-where the weights are increasing with the distance to the center of the image
-thus favoring structures concentrated within this part of the image.  Under
-strict normalization and positivity constraints and in the absence of any
-data, the default image given by this prior is
+where the weights $w^\PriorTag_n$ are increasing with the distance to the
+center of the image thus favouring structures concentrated within this part of
+the image.  Under strict normalization and positivity constraints and in the
+absence of any data, the default image given by this prior is
 $\bar{x}_n\propto1/w^\PriorTag_n$ where the factor comes from the
 normalization requirement \citep{LeBesnerais_et_al-2008-interferometry}. This
 regularizer is effective because imposing a compact, positive brightness
@@ -1150,19 +1168,21 @@ achieved by:
   \sqrt{\epsilon^2 + \abs{\nabla\VParam}_{n_1,n_2}^2}
 \end{equation}
 where $\epsilon>0$ is a chosen threshold and $\abs{\nabla\VParam}^2$ is the
-squared magnitude of the spatial gradient of the image:
+squared magnitude of the spatial gradient of the image.  For instance:
 \begin{displaymath}
   \label{eq:spatial-gradient-magnitude}
   \abs{\nabla\VParam}_{n_1,n_2}^2 =
-  (x_{n_1+1,n_2} - x_{n_1,n_2})^2 + (x_{n_1,n_2+1} - x_{n_1,n_2})^2 \, .
+  (x_{n_1+1,n_2} - x_{n_1,n_2})^2 + (x_{n_1,n_2+1} - x_{n_1,n_2})^2 \, ,
 \end{displaymath}
-The penalization in \Eq{eq:edge-preserving-roughness} behaves as a quadratic
-function where the magnitude of the spatial gradient is small compared to
-$\epsilon$, and a linear function when the gradient is large.  Hence reduction
-of small local variations is achieved without over-penalizing strong sharp
-features.  In the limit $\epsilon\rightarrow0$, edge-preserving smoothness
-behaves like \emph{total variation} \citep{Rudin_et_al-1992-total_variation}
-which has proved successful in imposing sparsity.
+where $(n_1,n_2) \sim n$ are the column and row indices corresponding to the
+$n$-th pixel.  The penalization in \Eq{eq:edge-preserving-roughness} behaves as
+a quadratic function where the magnitude of the spatial gradient is small
+compared to $\epsilon$, and a linear function when the gradient is large. 
+Hence reduction of small local variations is achieved without over-penalizing
+strong sharp features.  In the limit $\epsilon\rightarrow0$, edge-preserving
+smoothness behaves like \emph{total variation}
+\citep{Rudin_et_al-1992-total_variation} which has proved successful in
+imposing sparsity.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% OPTICAL INTERFEROMETRY %
@@ -1267,29 +1287,30 @@ realistic optical interferometric data and which are sufficiently mature to be
 used with real data.  In addition to coping with sparse Fourier data, these
 methods were specifically designed to tackle the non-linear direct model, to
 account for the particular statistics of the data
-\citep{Meimon_et_al-2005-convex_approximation} and to handle the new data
+\citep{Meimon_et_al-2005-convex_approximation} and to handle the OI-FITS data
 format \citep{Pauls_et_al-2005-oifits}. A summary of the methods is given in
 \Tab{tab:algorithms}.
 
 \begin{table}
-  \begin{center}
-    \begin{tabular}{p{6.2em}p{7.8em}p{8.9em}l}
-      \hline
-      \hline
-      Name & Authors & Optimization & Regularization \\
-      \hline
+  \centering
+  \resizebox{\textwidth}{!}{
+    \rowcolors{3}{tablerowcolor}{}
+    \begin{tabular}{P{6.2em}P{8.1em}P{9.3em}l}
+      \TopRule
+      \rowcolor{tableheadcolor}
+      \bf Name & \bf Authors & \bf Optimization & \bf Regularization \\
+      %\hline
       BSMEM & Baron, Buscher & Trust region gradient & MEM-prior \\
-      MiRA & Thi{\'e}baut & VMLM-B$^{(\star)}$ & Many \\
-      WISARD & Meimon, Mugnier, Le~Besnerais &  VMLM-B$^{(\star)}$ plus self-calibration & Many \\
-      \hline
+      MiRA & Thi{\'e}baut & VMLM-B & Many \\
+      WISARD & Meimon, Mugnier, Le~Besnerais & VMLM-B plus\\self-calibration & Many \\
+      %\hline
       MACIM & Ireland, Monnier & Simulated annealing & MEM \\
-      SQUEEZE & Baron, Monnier, Kloppenborg & Parallel tempering & \\
-      \hline
-      Building Block method & Hofmann, Weigelt & Matching pursuit & Sparsity \\
-      \hline
-      \hline
-    \end{tabular}
-  \end{center}
+      SQUEEZE & Baron, Monnier, Kloppenborg & Parallel tempering & Sparsity \\
+      %\hline
+      Building Block Method & Hofmann, Weigelt & Matching pursuit & Sparsity \\
+      \BottomRule
+  \end{tabular}
+  }
   \caption{\label{tab:algorithms} Summary of the algorithms for image
     reconstruction from optical interferometric data described in
     Section~\ref{sec:new-methods}.
@@ -1382,17 +1403,17 @@ framework and imaging on spheroids are also being implemented.
 
 \textit{5) \Mira algorithm} \citep{Thiebaut-2008-Marseille} defines the sought
 image as the minimum of the penalty function in \Eq{eq:cost-function}.
-Minimization is done by a limited variable memory method (based on BFGS
-updates) with bound constraints for the positivity
+Minimization is done by VMLM-B, a limited variable memory method (based on
+BFGS updates) with bound constraints for the positivity
 \citep{Thiebaut:spie2002:bdec}.  \Mira is written in a modular way: any type
 of data can be taken into account by providing a function that computes the
 corresponding penalty and its gradient.  For the moment, \Mira handles complex
 visibility, power spectrum and closure-phase data via penalty terms given by
 \Eq{eq:fdata-local-approx}, \Eq{eq:powerspectrum-penalty} and
-\Eq{eq:Mira-phase-closure-penalty}. \Mira can cope with any missing data, in
-particular, it can be used to restore an image given only the power spectrum
-(\ie\ without any Fourier phase information) with at least a $180^\circ$
-orientation ambiguity.
+\Eq{eq:Mira-phase-closure-penalty}. Like \BSMEM, \Mira can cope with any
+missing data, in particular, it can be used to restore an image given only the
+power spectrum (\ie\ without any Fourier phase information) with at least a
+$180^\circ$ orientation ambiguity.
 
 \textit{6) \Wisard algorithm} \citep{Meimon_et_al-2005-weak_phase_imaging}
 recovers an image from power spectrum and closure phase data.  It exploits a
@@ -1449,14 +1470,14 @@ reconstruction are as follows:
 
 \item Extract data for the observing target, timespan and wavelengths
   (specified as a numerical range or set of \verb+INSNAME+ values) specified
-  by the user
+  by the user.
 
 \item Determine the observation times and wavelengths of all usable data
   (usable meaning not flagged and comprising an appropriate combination of
   observables, for example powerspectra and bispectra measured simultaneously
-  using the same telescopes and spectral channels)
+  using the same telescopes and spectral channels).
 
-\item Extract the usable data for these observation times and wavelengths
+\item Extract the usable data for these observation times and wavelengths.
 \end{itemize}
 
 Proposals for extending \OIFITS have been discussed at length by the
@@ -1515,16 +1536,16 @@ of under-regularization (which yields more artifacts) and over-regularization
 (which yields over-simplification of the image).
 
 \begin{table}
-  \begin{center}
-    {\small
-    \begin{tabular}{p{8em}lll}
-      \hline
-      \hline
-      Name & $\Fprior(\VParam)$ & Parameters & Implemented by \\
-      \hline
+  \centering
+  \resizebox{\textwidth}{!}{
+    \rowcolors{3}{tablerowcolor}{}
+    \begin{tabular}{M{8.2em}ccl}
+      \TopRule
+      \rowcolor{tableheadcolor}
+      \bf Name & $\Fprior(\VParam)$ & \bf Parameters & \bf Implemented by \\
       Quadratic smoothness
       & $\norm{\VParam - \V{S} \cdot \VParam}^2$ & & \Mira, \Wisard? \\
-      \hline
+      %\hline
       MEM-sqrt & $-\sum_n \sqrt{\Param_n} $ & & \Mira \\
       MEM-log  & $-\sum_n \log( \Param_n ) $ & & \Mira \\
       MEM-prior
@@ -1532,20 +1553,19 @@ of under-regularization (which yields more artifacts) and over-regularization
         \Param_n\,\log( \Param_n/\bar{\Param}_n) - \Param_n + \bar{\Param}_n
       \right]$
       & Default image $\bar{\VParam}$ & \Mira, \BSMEM \\
-      \hline
+      %\hline
       Compactness
       & $\sum_n w^\PriorTag_n\,\Param_n^2; \,
-      w^\PriorTag_n = \norm{\VDirn_n}^\beta$ & $\beta$ & \Mira \\
-      \hline
+      w^\PriorTag_n = \norm{\VDirn_n}^\beta$ & $\beta > 0$ & \Mira, \Wisard \\
+      %\hline
       Edge-preserving smoothness
-      $\epsilon\!\rightarrow\!0\implies\text{TV}$
+      ($\sim\text{TV}$ when $\epsilon\!\rightarrow\!0$)
       & $\sum_{n_1,n_2}\sqrt{\epsilon^2 + \abs{\nabla\VParam}_{n_1,n_2}^2}$
-      & $\epsilon$ & \Mira, \Wisard \\
-      \hline
-      \hline
+      & $\epsilon > 0$ & \Mira, \Wisard \\
+      \BottomRule
     \end{tabular}
   }
-  \end{center}
+
   \caption{\label{tab:regularization} Summary of the most useful
     regularization types implemented by the algorithms being developed under
     the JRA. The names used here are taken from
