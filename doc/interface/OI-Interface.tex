@@ -219,9 +219,9 @@ prefix \STRING{OI\_}.
   \ROW{TARGET}{string}{Identifier of the target object to reconstruct}
   \ROW{WAVE\_MIN}{real}{Minimum wavelength to select (in meters)}
   \ROW{WAVE\_MAX}{real}{Maximum wavelength to select (in meters)}
-  \ROW{USE\_VIS}{logical}{Use complex visibility data if any}
+  \ROW{USE\_VIS}{string}{Complex visibility data to consider if any$^\dagger$}
   \ROW{USE\_VIS2}{logical}{Use squared visibility data if any}
-  \ROW{USE\_T3}{logical}{Use triple product data if any}
+  \ROW{USE\_T3}{string}{Bispectrum data to consider if any$^\dagger$}
   \hline
   \ROWTITLE{Algorithm Settings}
   \hline
@@ -232,6 +232,8 @@ prefix \STRING{OI\_}.
   \ROW{RGL\_WGT}{real}{Weight of the regularization}
   \ROW{RGL\_ALPH}{real}{Parameter $\alpha$ of the regularization}
   \ROW{RGL\_BETA}{real}{Parameter $\beta$ of the regularization}
+  \ROW{RGL\_GAMM}{real}{Parameter $\gamma$ of the regularization}
+  \ROW{RGL\_TAU}{real}{Parameter $\tau$ of the regularization}
   \ROW{RGL\_PRIO}{string}{Identifier of the HDU with the prior image}
   \hline
   \ROWTITLE{Image Parameters}
@@ -257,6 +259,7 @@ prefix \STRING{OI\_}.
   \ROW{LAST\_IMG}{string}{Identifier of the final image \oops{(in \STRING{IMAGE-OI OUTPUT PARAM})}}
   \hline
 \end{tabular}
+$^\dagger$ value can be: "NONE", "ALL", "AMP" or "PHI".
 \end{table}
 
 In version 1 of OIFITS, the first (primary) HDU is almost
@@ -547,7 +550,7 @@ parameter values in an existing file.
 
 \begin{verbatim}
 oi-image create myinput.fits CDELT1=0.25 MAXITER=200 INIT_IMG=myimage.fits
-oi-image edit myinput.fits RGL_ALPH=1e-3 USE_T3A=F
+oi-image edit myinput.fits RGL_ALPH=1e-3 USE_T3A=NONE
 \end{verbatim}
 
 %==============================================================================
