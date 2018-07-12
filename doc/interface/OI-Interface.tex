@@ -156,6 +156,72 @@ instance:
 
 
 %==============================================================================
+\renewcommand{\ROW}[3]{\KEYWORD{#1} & #2 &#3 \\}
+\renewcommand{\ROWTITLE}[1]{\multicolumn{3}{c}{\textbf{#1}} \\*
+  Keyword & Type & Description \\*}
+
+\begin{longtable}[c]{lcp{83mm}}
+  %\centering
+  \caption[FITS keywords]{FITS keywords used to specify the input
+  parameters.  The \emph{Image Parameters} are stored in the HDU which
+  contains the initial image. This HDU is specified by the value of the
+  \KEYWORD{INIT\_IMG} keyword, which gives its \KEYWORD{HDUNAME}. All other
+  parameters \oops{(except \KEYWORD{LAST\_IMG})} are in a binary table HDU
+  with \KEYWORD{EXTNAME} of \STRING{IMAGE-OI INPUT PARAM}.
+  \label{tab:input-params}}
+  \endfirsthead
+  \caption[]{(continued)}
+  \endhead
+%
+  \hline
+  \ROWTITLE{Data Selection}
+  \hline
+  \ROW{TARGET}{string}{Identifier of the target object to reconstruct}
+  \ROW{WAVE\_MIN}{real}{Minimum wavelength to select (in meters)}
+  \ROW{WAVE\_MAX}{real}{Maximum wavelength to select (in meters)}
+  \ROW{USE\_VIS}{string}{Complex visibility data to consider if any$^\dagger$}*
+  \ROW{USE\_VIS2}{logical}{Use squared visibility data if any}
+  \ROW{USE\_T3}{string}{Bispectrum data to consider if any$^\dagger$}[1ex]
+  \multicolumn{3}{c}{$^\dagger$ value can be: \STRING{NONE}, \STRING{ALL},
+   \STRING{AMP} or \STRING{PHI}.}\\
+  \hline
+  \ROWTITLE{Algorithm Settings}
+  \hline
+  \ROW{INIT\_IMG}{string}{Identifier of the initial image}
+  \ROW{MAXITER}{integer}{Maximum number of iterations to run}
+  \ROW{RGL\_NAME}{string}{Name of the regularization method}
+  \ROW{AUTO\_WGT}{logical}{Automatic regularization weight}
+  \ROW{RGL\_WGT}{real}{Weight of the regularization}
+  \ROW{RGL\_ALPH}{real}{Parameter $\alpha$ of the regularization}
+  \ROW{RGL\_BETA}{real}{Parameter $\beta$ of the regularization}
+  \ROW{RGL\_GAMM}{real}{Parameter $\gamma$ of the regularization}
+  \ROW{RGL\_TAU}{real}{Parameter $\tau$ of the regularization}
+  \ROW{RGL\_PRIO}{string}{Identifier of the HDU with the prior image}
+  \hline
+  \ROWTITLE{Image Parameters}
+  \hline
+  \ROW{HDUNAME}{string}{Unique name for the image within the FITS file}
+  \ROW{NAXIS1}{integer}{First dimension of the image}
+  \ROW{NAXIS2}{integer}{Second dimension of the image}
+  \ROW{CTYPE1}{string}{\STRING{RA---TAN}}
+  \ROW{CTYPE2}{string}{\STRING{DEC--TAN}}
+  \ROW{CDELT{\slshape i}}{real}{Pixel increment along \texttt{\slshape i}-th
+    dimension of the image (for \texttt{\slshape i} = 1 or 2)}
+  \ROW{CUNIT{\slshape i}}{string}{Physical units for \KEYWORD{CDELT{\slshape i}}
+    and \KEYWORD{CRVAL{\slshape i}}; defaults to \STRING{deg} if omitted}
+  \ROW{CRPIX{\slshape i}}{real}{Index of reference pixel along \texttt{\slshape i}-th
+    dimension (for \texttt{\slshape i} = 1 or 2); defaults to the geometric center
+    of the field of view if omitted}
+  \ROW{CRVAL{\slshape i}}{real}{Physical coordinate of reference pixel along
+    \texttt{\slshape i}-th dimension (for \texttt{\slshape i} = 1 or 2) and
+    relative to the center of the field of view; defaults to 0 if omitted}
+  \hline
+  \ROWTITLE{Algorithm Results}
+  \hline
+  \ROW{LAST\_IMG}{string}{Identifier of the final image \oops{(in \STRING{IMAGE-OI OUTPUT PARAM})}}
+  \hline
+\end{longtable}
+
 \section{Input format}
 
 All existing algorithms take their input data in the OI-FITS format
@@ -193,74 +259,6 @@ prefix \STRING{OI\_}.
 
 
 \subsection{Scalar input parameters}
-
-\renewcommand{\ROW}[3]{\KEYWORD{#1} & #2 &#3 \\}
-\renewcommand{\ROWTITLE}[1]{\multicolumn{3}{c}{\textbf{#1}} \\
-  Keyword & Type & Description \\}
-
-\begin{table}
-  \centering
-  
-  \caption{FITS keywords used to specify the input parameters.  The
-    \emph{Image Parameters} are stored in the HDU which contains the
-    initial image. This HDU is specified by the value of the
-    \KEYWORD{INIT\_IMG} keyword, which gives its
-    \KEYWORD{HDUNAME}. All other parameters \oops{(except
-      \KEYWORD{LAST\_IMG})} are in a binary table HDU with
-    \KEYWORD{EXTNAME} of \STRING{IMAGE-OI INPUT
-      PARAM}. \label{tab:input-params}}
-
-\medskip
-
-\begin{tabular}{lcp{83mm}}
-  \hline
-  \ROWTITLE{Data Selection}
-  \hline
-  \ROW{TARGET}{string}{Identifier of the target object to reconstruct}
-  \ROW{WAVE\_MIN}{real}{Minimum wavelength to select (in meters)}
-  \ROW{WAVE\_MAX}{real}{Maximum wavelength to select (in meters)}
-  \ROW{USE\_VIS}{string}{Complex visibility data to consider if any$^\dagger$}
-  \ROW{USE\_VIS2}{logical}{Use squared visibility data if any}
-  \ROW{USE\_T3}{string}{Bispectrum data to consider if any$^\dagger$}
-  \hline
-  \ROWTITLE{Algorithm Settings}
-  \hline
-  \ROW{INIT\_IMG}{string}{Identifier of the initial image}
-  \ROW{MAXITER}{integer}{Maximum number of iterations to run}
-  \ROW{RGL\_NAME}{string}{Name of the regularization method}
-  \ROW{AUTO\_WGT}{logical}{Automatic regularization weight}
-  \ROW{RGL\_WGT}{real}{Weight of the regularization}
-  \ROW{RGL\_ALPH}{real}{Parameter $\alpha$ of the regularization}
-  \ROW{RGL\_BETA}{real}{Parameter $\beta$ of the regularization}
-  \ROW{RGL\_GAMM}{real}{Parameter $\gamma$ of the regularization}
-  \ROW{RGL\_TAU}{real}{Parameter $\tau$ of the regularization}
-  \ROW{RGL\_PRIO}{string}{Identifier of the HDU with the prior image}
-  \hline
-  \ROWTITLE{Image Parameters}
-  \hline
-  \ROW{HDUNAME}{string}{Unique name for the image within the FITS file}
-  \ROW{NAXIS1}{integer}{First dimension of the image}
-  \ROW{NAXIS2}{integer}{Second dimension of the image}
-  \ROW{CTYPE1}{string}{\STRING{RA---TAN}}
-  \ROW{CTYPE2}{string}{\STRING{DEC--TAN}}
-  \ROW{CDELT{\slshape i}}{real}{Pixel increment along \texttt{\slshape i}-th
-    dimension of the image (for \texttt{\slshape i} = 1 or 2)}
-  \ROW{CUNIT{\slshape i}}{string}{Physical units for \KEYWORD{CDELT{\slshape i}}
-    and \KEYWORD{CRVAL{\slshape i}}; defaults to \STRING{deg} if omitted}
-  \ROW{CRPIX{\slshape i}}{real}{Index of reference pixel along \texttt{\slshape i}-th
-    dimension (for \texttt{\slshape i} = 1 or 2); defaults to the geometric center
-    of the field of view if omitted}
-  \ROW{CRVAL{\slshape i}}{real}{Physical coordinate of reference pixel along
-    \texttt{\slshape i}-th dimension (for \texttt{\slshape i} = 1 or 2) and
-    relative to the center of the field of view; defaults to 0 if omitted}
-  \hline
-  \ROWTITLE{Algorithm Results}
-  \hline
-  \ROW{LAST\_IMG}{string}{Identifier of the final image \oops{(in \STRING{IMAGE-OI OUTPUT PARAM})}}
-  \hline
-\end{tabular}
-$^\dagger$ value can be: "NONE", "ALL", "AMP" or "PHI".
-\end{table}
 
 In version 1 of OIFITS, the first (primary) HDU is almost
 empty. However, the draft version 2 of OIFITS introduces primary
