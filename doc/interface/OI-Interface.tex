@@ -144,7 +144,7 @@ To make the interfacing as simple as possible, it is proposed in this
 document to use a single entry file containing all input parameters
 and data and a single output file with all the results (either
 intermediate or final).  The flexibility of the FITS file format is
-exploited to store all these informations and data.
+exploited to store all these information and data.
 
 All image reconstruction software must be able to run from the command line
 and with two arguments: the names of the input and output files (possibly with
@@ -167,7 +167,7 @@ instance:
   contains the initial image. This HDU is specified by the value of the
   \KEYWORD{INIT\_IMG} keyword, which gives its \KEYWORD{HDUNAME}. All other
   parameters \oops{(except \KEYWORD{LAST\_IMG})} are in a binary table HDU
-  with \KEYWORD{EXTNAME} of \STRING{IMAGE-OI INPUT PARAM}.
+  with \KEYWORD{EXTNAME} of \STRING{IMAGE-OI~INPUT~PARAM}.
   \label{tab:input-params}}
   \endfirsthead
   \caption[]{(continued)}
@@ -192,10 +192,10 @@ instance:
   \ROW{RGL\_NAME}{string}{Name of the regularization method}
   \ROW{AUTO\_WGT}{logical}{Automatic regularization weight}
   \ROW{RGL\_WGT}{real}{Weight of the regularization}
-  \ROW{RGL\_ALPH}{real}{Parameter $\alpha$ of the regularization}
-  \ROW{RGL\_BETA}{real}{Parameter $\beta$ of the regularization}
-  \ROW{RGL\_GAMM}{real}{Parameter $\gamma$ of the regularization}
-  \ROW{RGL\_TAU}{real}{Parameter $\tau$ of the regularization}
+%  \ROW{RGL\_ALPH}{real}{Parameter $\alpha$ of the regularization}
+%  \ROW{RGL\_BETA}{real}{Parameter $\beta$ of the regularization}
+%  \ROW{RGL\_GAMM}{real}{Parameter $\gamma$ of the regularization}
+%  \ROW{RGL\_TAU}{real}{Parameter $\tau$ of the regularization}
   \ROW{RGL\_PRIO}{string}{Identifier of the HDU with the prior image}
   \ROW{FLUX}{real}{Assumed total flux (1 is the default)}
   \ROW{FLUXERR}{real}{Error bar for the total flux (0 means strict constraint)}  
@@ -254,49 +254,49 @@ Note that the FITS standard states that angular measurements expressed
 as floating-point values and specified with reserved keywords
 \emph{should} be given in degrees.
 
-The HDUs that are specific to the interface specification described in
-this document have \KEYWORD{EXTNAME} values prefixed with
-\STRING{IMAGE-OI}. This is to distinguish them from OIFITS HDUs, which use the
-prefix \STRING{OI\_}.
+The HDUs that are specific to the interface specification described in this
+document have \KEYWORD{EXTNAME} values prefixed with \STRING{IMAGE-OI}.
+This is to distinguish them from OIFITS HDUs, which use the prefix
+\STRING{OI\_}.
 
 
 \subsection{Scalar input parameters}
 
-In version 1 of OIFITS, the first (primary) HDU is almost
-empty. However, the draft version 2 of OIFITS introduces primary
-header keywords summarizing the data and giving its provenance. We
-propose, therefore, storing the scalar image reconstruction input
-parameters in a separate HDU. In anticipation of perhaps needing to
-store vector parameters in future, this HDU shall be a binary table
-HDU. This binary table shall contain all of the non-image parameters,
-with the exception of the pixel size and the dimensions of the
-reconstructed image which are specified by those of the initial image
-(see below), itself stored in a dedicated (image)
-HDU. Table~\ref{tab:input-params} gives some examples of the input
+In version 1 of OIFITS, the first (primary) HDU is almost empty.  However,
+the draft version 2 of OIFITS introduces primary header keywords
+summarizing the data and giving its provenance.  We propose, therefore,
+storing the scalar image reconstruction input parameters in a separate HDU.
+In anticipation of perhaps needing to store vector parameters in future,
+this HDU shall be a binary table HDU.  This binary table shall have
+\KEYWORD{EXTNAME} keyword set to \STRING{IMAGE-OI~INPUT~PARAM} and shall
+contain all of the non-image parameters, with the exception of the pixel
+size and the dimensions of the reconstructed image which are specified by
+those of the initial image (see below), itself stored in a dedicated
+(image) HDU. Table~\ref{tab:input-params} gives some examples of the input
 parameters.
 
 
 \subsection{Data selection}
 
-To keep things simple, any sophisticated selection, merging or editing
-of the data should be done by a separate tool.  The image
-reconstruction software applications shall assume that they receive
-clean input data.  There are however a few parameters devoted to the
-selection of data.  The \KEYWORD{TARGET} keyword specifies the name of
-the target object to reconstruct.  The value of this keyword should
-match one of the identifiers in the column \KEYWORD{TARGET} in the
-\texttt{OI\_TARGET} binary table of the OIFITS file.  In order to
-restrict the types of interferometric data used for the
-reconstruction, keywords \KEYWORD{USE\_VIS}, \KEYWORD{USE\_VIS2} and
-\KEYWORD{USE\_T3} should be set with logical values specifying whether
-to use the complex visibility, the squared visibility, and the
-triple-product data if any.  Not all algorithms can use all types of
-data and the values of these keywords should be set (in the output
-file) so as to reflect what was really used.
-
-\oops{Shall we have \KEYWORD{USE\_VISA}/\KEYWORD{USE\_VISP} to distinguish
-  amplitude/phase data? And likely, \KEYWORD{USE\_T3A}/\KEYWORD{USE\_T3P}
-  for the triple-product data?}
+To keep things simple, any sophisticated selection, merging or editing of
+the data should be done by a separate tool.  The image reconstruction
+software applications shall assume that they receive clean input data.
+There are however a few parameters devoted to the selection of data.  The
+\KEYWORD{TARGET} keyword specifies the name of the target object to
+reconstruct.  The value of this keyword should match one of the identifiers
+in the column \KEYWORD{TARGET} in the \texttt{OI\_TARGET} binary table of
+the OIFITS file.  In order to restrict the types of interferometric data
+used for the reconstruction, keywords \KEYWORD{USE\_VIS},
+\KEYWORD{USE\_VIS2} and \KEYWORD{USE\_T3} should be set with values
+specifying which complex visibility data, powerspectrum data and bispectrum
+data to use if any.  More specifically, keywords \KEYWORD{USE\_VIS} and
+\KEYWORD{USE\_T3} take string values which are \STRING{NONE}, \STRING{ALL},
+\STRING{AMP} or \STRING{PHI} to indicate whether all, none, only the
+amplitude or only the phase of such data have to be used.  Keyword
+\KEYWORD{USE\_VIS2} has a boolean value indicating whether to consider the
+powerspectrum data.  Not all algorithms can use all types of data and the
+values of these keywords should be set (in the output file) so as to
+reflect what was really used.
 
 Whatever these settings, the image reconstruction software have to
 honor the \KEYWORD{FLAG} column of the OI data.  We recall that this
@@ -304,7 +304,6 @@ field has a logical value which is true when the corresponding piece
 of data should be discarded and false when it should be considered.
 
 Wavelength selection is discussed in the next section.
-
 
 
 \subsection{Wavelength range}
@@ -457,7 +456,7 @@ images are distinguished by their names (given by their
   \emph{output} parameters HDU with name of the final image and let
   all reconstructed images be called:
 \begin{quote}
-\KEYWORD{HDUNAME = 'OUTPUT\VARIABLE{n}'}
+\KEYWORD{HDUNAME = 'IMAGE-OI OUTPUT\VARIABLE{n}'}
 \end{quote}
 with \VARIABLE{n} the iteration number.}
 
