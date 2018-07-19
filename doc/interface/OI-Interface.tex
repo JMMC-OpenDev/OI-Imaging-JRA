@@ -166,7 +166,7 @@ instance:
   parameters.  The \emph{Image Parameters} are stored in the HDU which
   contains the initial image. This HDU is specified by the value of the
   \KEYWORD{INIT\_IMG} keyword, which gives its \KEYWORD{HDUNAME}. All other
-  parameters \oops{(except \KEYWORD{LAST\_IMG})} are in a binary table HDU
+  parameters are in a binary table HDU
   with \KEYWORD{EXTNAME} of \STRING{IMAGE-OI~INPUT~PARAM}.
   \label{tab:input-params}}
   \endfirsthead
@@ -218,10 +218,6 @@ instance:
     \texttt{\slshape i}-th dimension (for \texttt{\slshape i} = 1 or 2) and
     relative to the center of the field of view; defaults to 0 if omitted}
   \hline
-  \ROWTITLE{Algorithm Results}
-  \hline
-  \ROW{LAST\_IMG}{string}{Identifier of the final image \oops{(in \STRING{IMAGE-OI OUTPUT PARAM})}}
-  \hline
 \end{longtable}
 
 \section{Input format}
@@ -267,7 +263,7 @@ the draft version 2 of OIFITS introduces primary header keywords
 summarizing the data and giving its provenance.  We propose, therefore,
 storing the scalar image reconstruction input parameters in a separate HDU.
 In anticipation of perhaps needing to store vector parameters in future,
-this HDU shall be a binary table HDU.  This binary table shall have
+this HDU shall be a binary table HDU.  This binary table shall have the
 \KEYWORD{EXTNAME} keyword set to \STRING{IMAGE-OI~INPUT~PARAM} and shall
 contain all of the non-image parameters, with the exception of the pixel
 size and the dimensions of the reconstructed image which are specified by
@@ -292,13 +288,13 @@ specifying which complex visibility data, powerspectrum data and bispectrum
 data to use if any.  More specifically, keywords \KEYWORD{USE\_VIS} and
 \KEYWORD{USE\_T3} take string values which are \STRING{NONE}, \STRING{ALL},
 \STRING{AMP} or \STRING{PHI} to indicate whether all, none, only the
-amplitude or only the phase of such data have to be used.  Keyword
-\KEYWORD{USE\_VIS2} has a boolean value indicating whether to consider the
+amplitude or only the phase of such data are to be used.  Keyword
+\KEYWORD{USE\_VIS2} has a boolean value indicating whether to use the
 powerspectrum data.  Not all algorithms can use all types of data and the
 values of these keywords should be set (in the output file) so as to
 reflect what was really used.
 
-Whatever these settings, the image reconstruction software have to
+Whatever these settings, the image reconstruction software must
 honor the \KEYWORD{FLAG} column of the OI data.  We recall that this
 field has a logical value which is true when the corresponding piece
 of data should be discarded and false when it should be considered.
@@ -308,11 +304,12 @@ Wavelength selection is discussed in the next section.
 
 \subsection{Wavelength range}
 
-The primary objective is to consider monochromatic image reconstruction.  The
-interferometric data are generally available at many wavelengths.  The result
-will, in fact, be a gray image of the target built from the data in the
-wavelength range (inclusive) specified by the FITS keywords \KEYWORD{WAVE\_MIN}
-and \KEYWORD{WAVE\_MAX}. The wavelength range is given in meters.
+The primary objective is to consider monochromatic image reconstruction.
+The interferometric data are generally available at many wavelengths.  The
+result will, in fact, be a gray image of the target built from the data in
+the wavelength range (inclusive) specified by the FITS keywords
+\KEYWORD{WAVE\_MIN} and \KEYWORD{WAVE\_MAX}. The wavelength range is given
+in meters.
 
 
 \subsection{Initial image}
@@ -327,37 +324,36 @@ dimensions are given by the FITS keywords \KEYWORD{NAXIS1} and
 \KEYWORD{NAXIS2} while the pixel size is given by the FITS keywords
 \KEYWORD{CDELT1} and \KEYWORD{CDELT2} (both values must be the same).
 
-It is not intended that the image reconstruction algorithm be able to
-deal with any possible world coordinate system (WCS) nor with any
-possible coordinate units.  We therefore restrict to WCS which can be
-fully specified with \KEYWORD{CRPIX\VARIABLE{i}},
+It is not intended that the image reconstruction algorithm be able to deal
+with any possible world coordinate system (WCS) nor with any possible
+coordinate units.  We therefore restrict this standard to WCS which can be
+fully specified by the \KEYWORD{CRPIX\VARIABLE{i}},
 \KEYWORD{CRVAL\VARIABLE{i}}, \KEYWORD{CDELT\VARIABLE{i}},
 \KEYWORD{CTYPE\VARIABLE{i}}, and \KEYWORD{CUNIT\VARIABLE{i}} keywords
 (where \VARIABLE{i} is the axis number). Other WCS keywords like
 \KEYWORD{CROTAn}, \KEYWORD{PC\VARIABLE{i}\_\VARIABLE{j}},
-\KEYWORD{DC\VARIABLE{i}\_\VARIABLE{j}}, should not be specified as
-their default values (according to FITS standard) are suitable for us.
-The same WCS conventions hold for any output image produced by the
-reconstruction algorithm.  For any external software to correctly
-display the images, the parameters of the WCS must be completely and
-correctly specified.
+\KEYWORD{DC\VARIABLE{i}\_\VARIABLE{j}}, should not be specified as their
+default values (according to the FITS standard) are suitable for us.  The
+same WCS conventions hold for any output image produced by the
+reconstruction algorithm.  For any external software to correctly display
+the images, the parameters of the WCS must be completely and correctly
+specified.
 
-The conventions are that the first image axis corresponds to the right
-ascension (RA) and second image axis corresponds to the declination
-(DEC) both relative to the center of the field of view (FOV) specified
-by the keywords \KEYWORD{CRPIX\VARIABLE{i}} (in fractional pixel
-units). If keywords \KEYWORD{CRPIX\VARIABLE{i}} are omitted, they
-default to the geometric center of the FOV. The pixel size (which is
-specified by the absolute values of \KEYWORD{CDELT1} and
-\KEYWORD{CDELT2}) must be the same in both direction.  Following
-standard conventions to display an image, to have the relative right
-ascension (RA) oriented toward East to correspond to the left (first
-columns) of the image, \KEYWORD{CDELT1} should be strictly negative,
-while, to have the relative declination (DEC) oriented toward North to
-correspond to the top (last rows) of the image,  \KEYWORD{CDELT2}
-should be strictly positive. By default, the physical coordinate units
-are in degrees; otherwise \KEYWORD{CUNIT\VARIABLE{i}} can be
-\verb+'deg'+ for degrees or \verb+'arsec'+ for arcseconds.
+The conventions are that the first image axis corresponds to right
+ascension (RA) and second image axis corresponds to declination (DEC) both
+relative to the center of the field of view (FOV) specified by the keywords
+\KEYWORD{CRPIX\VARIABLE{i}} (in fractional pixel units). If keywords
+\KEYWORD{CRPIX\VARIABLE{i}} are omitted, they default to the geometric
+center of the FOV. The pixel size (which is specified by the absolute
+values of \KEYWORD{CDELT1} and \KEYWORD{CDELT2}) must be the same in both
+directions.  Following standard conventions for display of a celestial
+image, to have the relative right ascension (RA) oriented toward East to
+correspond to the left (first columns) of the image, \KEYWORD{CDELT1}
+should be strictly negative, while, to have the relative declination (DEC)
+oriented toward North to correspond to the top (last rows) of the image,
+\KEYWORD{CDELT2} should be strictly positive. By default, the physical
+coordinate units are in degrees; otherwise \KEYWORD{CUNIT\VARIABLE{i}} may
+be \verb+'deg'+ for degrees or \verb+'arcsec'+ for arcseconds.
 Table~\ref{tab:wcs} summarizes these rules.
 
 The OI-FITS norm specifies that \KEYWORD{RAEP0} and \KEYWORD{DECEP0}
@@ -382,11 +378,11 @@ $(0,0)$.}
   Keyword & Description & Default \\
   \hline
   \hline
-  \KEYWORD{CRPIX\VARIABLE{i}} & Index index of the reference pixel &
+  \KEYWORD{CRPIX\VARIABLE{i}} & Index of the reference pixel &
   Geometric center \\
    & (start at 1 and can be fractional) \\
   \hline
-  \KEYWORD{CRVAL\VARIABLE{i}} & Physical coordinate of ref. pixel & 0.0 \\
+  \KEYWORD{CRVAL\VARIABLE{i}} & Physical coordinate of ref.\ pixel & 0.0 \\
   \hline
   \KEYWORD{CDELT\VARIABLE{i}} & Physical coordinate increment & \\
   \hline
@@ -395,7 +391,7 @@ $(0,0)$.}
   && \STRING{DEC--TAN} for 2nd axis \\
   \hline
   \KEYWORD{CUNIT\VARIABLE{i}} & Units of the physical coordinates&
-  Degree \\
+  degree \\
   \hline
   \end{tabular}
 \end{table}
@@ -460,14 +456,13 @@ images are distinguished by their names (given by their
 \end{quote}
 with \VARIABLE{n} the iteration number.}
 
-In order to continue the iterations of a previous reconstruction run,
-the image reconstruction algorithm may be started with the final image
-instead of the initial one.  To that end, there must be some means to
-specify the starting image for the reconstruction.  This is the
-purpose of the \KEYWORD{INIT\_IMG} keyword (see
-Table~\ref{tab:input-params}) in the input parameters HDU which
-indicates the HDUNAME of the initial image. This HDUNAME must be
-unique within the file.
+In order to continue the iterations of a previous reconstruction run, the
+image reconstruction algorithm may be started with the final image instead
+of the initial one.  To that end, there must be some means to specify the
+starting image for the reconstruction.  This is the purpose of the
+\KEYWORD{INIT\_IMG} keyword (see Table~\ref{tab:input-params}) in the input
+parameters HDU which indicates the \KEYWORD{HDUNAME} of the initial
+image. This \KEYWORD{HDUNAME} must be unique within the file.
 
 \subsubsection{Output parameters}
 
@@ -476,10 +471,28 @@ stored in a binary table HDU with \KEYWORD{EXTNAME} of
 \STRING{IMAGE-OI OUTPUT PARAM}. Examples of scalar outputs include
 $\chi^2$, any regularization parameters estimated from the data, and
 any model parameters that are not image pixels (for example stellar
-disk parameters in SPARCO).
+disk parameters in SPARCO). Standard output parameters are listed in
+Table~\ref{tab:output-params}.
 
-\oops{Need to list standard output parameters in a table. Include
-  something to identify the algorithm that was used?}
+\begin{longtable}[c]{lcp{83mm}}
+  %\centering
+  \caption[FITS keywords]{FITS keywords used to specify the output
+  parameters. These keywords must be stored in a binary table HDU
+  with \KEYWORD{EXTNAME} of \STRING{IMAGE-OI~OUTPUT~PARAM}.
+  \label{tab:output-params}}
+  \endfirsthead
+  \caption[]{(continued)}
+  \endhead
+%
+  \hline
+  \ROWTITLE{Algorithm Results}
+  \hline
+  \ROW{LAST\_IMG}{string}{Identifier of the final image}
+  \ROW{NITER}{integer}{Total iterations done in the current program run}
+  \ROW{CHISQ}{real}{Reduced chi-squared}
+  \ROW{FLUX}{real}{Total image flux}
+  \hline
+\end{longtable}
 
 \subsection{Model of the data}
 
