@@ -367,7 +367,7 @@ $(0,0)$.}
 
 \begin{table}
  \centering
-  \caption{FITS keywords used to specify the Wold Coordinate System(WCS).
+  \caption{FITS keywords used to specify the World Coordinate System (WCS).
     All these keywords refer to a given axis denoted as \VARIABLE{i}.}
     \label{tab:wcs}
     
@@ -548,12 +548,11 @@ Label & Format & Description \\
 \end{table}
 
 %==============================================================================
-\section{Command line tools}
+\section{Command line tool}
 
-It would be useful to provide command line tools for creating and
-editing input files (e.g. to change a parameter), in addition to the
-graphical user interface. Such tools would be useful for scripting
-tests, for example.
+A command line tool for creating and editing input files has been developed
+by John Young, see \url{https://github.com/jsy1001/OI-Interface-Tools}. The
+tool should be useful for scripting tests, for example.
 
 Some example command lines are shown below. The first creates a new input
 file named \verb+myinput.fits+ and sets the initial image from the
@@ -561,8 +560,8 @@ primary HDU of \verb+myimage.fits+. The second command changes
 parameter values in an existing file.
 
 \begin{verbatim}
-oi-image create myinput.fits CDELT1=0.25 MAXITER=200 INIT_IMG=myimage.fits
-oi-image edit myinput.fits RGL_ALPH=1e-3 USE_T3A=NONE
+image-oi-tool create myinput.fits CDELT1=0.25 MAXITER=200 INIT_IMG=myimage.fits
+image-oi-tool edit myinput.fits RGL_ALPH=1e-3 USE_T3A=NONE
 \end{verbatim}
 
 %==============================================================================
