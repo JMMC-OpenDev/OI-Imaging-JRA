@@ -163,10 +163,10 @@ instance:
 \begin{longtable}[c]{lcp{83mm}}
   %\centering
   \caption[FITS keywords]{FITS keywords used to specify the input
-  parameters.  The \emph{Image Parameters} are stored in the HDU which
-  contains the initial image. This HDU is specified by the value of the
-  \KEYWORD{INIT\_IMG} keyword, which gives its \KEYWORD{HDUNAME}. All other
-  parameters are in a binary table HDU
+  parameters. \oops{Are they all mandatory?} The \emph{Image Parameters}
+  are stored in the HDU which contains the initial image. This HDU is
+  specified by the value of the \KEYWORD{INIT\_IMG} keyword, which gives
+  its \KEYWORD{HDUNAME}. All other parameters are in a binary table HDU
   with \KEYWORD{EXTNAME} of \STRING{IMAGE-OI~INPUT~PARAM}.
   \label{tab:input-params}}
   \endfirsthead
@@ -293,6 +293,10 @@ amplitude or only the phase of such data are to be used.  Keyword
 powerspectrum data.  Not all algorithms can use all types of data and the
 values of these keywords should be set (in the output file) so as to
 reflect what was really used.
+
+\oops{Perhaps add \KEYWORD{INSNAME} keyword to select a specific
+  instrument. This is useful for GRAVITY where the science and fringe
+  tracker data are in the same OIFITS file.}
 
 Whatever these settings, the image reconstruction software must
 honor the \KEYWORD{FLAG} column of the OI data.  We recall that this
