@@ -34,7 +34,7 @@ jobs:
           root_file: unified_desc.tex
       - run: mkdir pdf
       - run: mv doc/interface/OI-Interface.pdf pdf/.
-      - run: mv unified_desc.pdf pdf/.
+      - run: mv doc/unified_desc/unified_desc.pdf pdf/.
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
