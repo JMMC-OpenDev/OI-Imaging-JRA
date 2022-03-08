@@ -198,7 +198,7 @@ instance:
 %  \ROW{RGL\_TAU}{real}{Parameter $\tau$ of the regularization}
   \ROW{RGL\_PRIO}{string}{Identifier of the HDU with the prior image}
   \ROW{FLUX}{real}{Assumed total flux (1 is the default)}
-  \ROW{FLUXERR}{real}{Error bar for the total flux (0 means strict constraint)}  
+  \ROW{FLUXERR}{real}{Error bar for the total flux (0 means strict constraint)}
   \hline
   \ROWTITLE{Image Parameters}
   \hline
@@ -374,9 +374,7 @@ $(0,0)$.}
   \caption{FITS keywords used to specify the World Coordinate System (WCS).
     All these keywords refer to a given axis denoted as \VARIABLE{i}.}
     \label{tab:wcs}
-    
     \medskip
-    
   \begin{tabular}{lll}
   \hline
   Keyword & Description & Default \\
@@ -495,6 +493,8 @@ Table~\ref{tab:output-params}.
   \ROW{NITER}{integer}{Total iterations done in the current program run}
   \ROW{CHISQ}{real}{Reduced chi-squared}
   \ROW{FLUX}{real}{Total image flux}
+  \ROW{PROCSOFT}{string}{Software name and version number}
+  \ROW{CONVERGE}{boolean}{Set to 'T' if the software stop because it has converged}
   \hline
 \end{longtable}
 
@@ -588,4 +588,3 @@ image-oi-tool edit myinput.fits RGL_ALPH=1e-3 USE_T3A=NONE
 \bibliography{OI-Interface}
 
 \end{document}
-
