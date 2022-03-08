@@ -31,7 +31,7 @@ jobs:
       - uses: xu-cheng/latex-action@v2
         with:
           working_directory: ./doc/unified_desc/
-          root_file: doc/unified_desc/unified_desc.tex
+          root_file: unified_desc.tex
       - run: mkdir pdf
       - run: mv doc/interface/OI-Interface.pdf pdf/.
       - run: mv unified_desc.pdf pdf/.
