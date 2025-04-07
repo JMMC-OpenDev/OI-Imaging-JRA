@@ -518,8 +518,8 @@ values given by model fitting software.
 \renewcommand{\ROWTITLE}[1]{\multicolumn{3}{c}{\textbf{#1}}\\}
 
 \begin{table}
-\caption{Colums inserted in OI-FITS binary tables to store the values given by
-the model.  \texttt{\textsl{NWAVE}} is the number of wavelengths.
+\caption{Columns inserted in OI-FITS binary tables to store the values given by
+the model.  \texttt{\textsl{NWAVE}} is the number of wavelengths. The \STRING{NS\_MODEL\_VIS2DATA} column was named \STRING{NS\_MODEL\_VIS2} in an early version of this document.
 \label{tab:model-columns}}
 \begin{tabular}{lcl}
 \hline
@@ -536,7 +536,7 @@ Label & Format & Description \\
 \ROWTITLE{New column in \texttt{OI\_VIS2} table}
 Label & Format & Description \\
 \hline
-\ROW{NS\_MODEL\_VIS2}{Model of the squared visibility}
+\ROW{NS\_MODEL\_VIS2DATA}{Model of the squared visibility}
 \ROW{NS\_MODEL\_VIS2ERR}{Model of the error in squared visibility \oops{(optional)}}
 \hline
 \hline
